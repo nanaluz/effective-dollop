@@ -1,0 +1,10 @@
+.gradle/
+build/
+.idea/
+*.iml
+captures/
+local.properties
+google-services.json
+_artifacts
+.DS_Store
+firebase-crashlytics-ndk/.externalNativeBuild/
