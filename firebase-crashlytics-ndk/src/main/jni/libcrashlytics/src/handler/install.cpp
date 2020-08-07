@@ -29,14 +29,22 @@
 
 #include "system/log.h"
 
-namespace google { namespace crashlytics { namespace detail {
+namespace google {
+namespace crashlytics {
+namespace detail {
 
 extern int open(const char* filename);
 
-}}}
+}
+}
+}
 
-namespace google { namespace crashlytics { namespace handler {
-namespace detail { std::atomic<void *> instance(nullptr); }
+namespace google {
+namespace crashlytics {
+namespace handler {
+namespace detail {
+std::atomic<void *> instance(nullptr);
+}
 namespace detail {
 
 struct breakpad_context {
@@ -44,7 +52,7 @@ struct breakpad_context {
     static bool callback(const google_breakpad::MinidumpDescriptor& descriptor, void* context, bool succeeded);
 
     explicit breakpad_context(const detail::context& handler_context);
-   ~breakpad_context();
+    ~breakpad_context();
 
 private:
     detail::context handler_context_;
@@ -128,8 +136,8 @@ bool install_signal_handler(const detail::context& handler_context)
 {
     if (detail::instance.load() == nullptr) {
         detail::instance.store(reinterpret_cast<void *>(
-            crashlytics::detail::memory::allocate_storage<detail::breakpad_context>(handler_context)
-        ));
+                                   crashlytics::detail::memory::allocate_storage<detail::breakpad_context>(handler_context)
+                               ));
     }
 
     return detail::instance.load() != nullptr;
@@ -146,7 +154,9 @@ bool install_handlers(detail::context handler_context)
     return install_signal_handler(handler_context);
 }
 
-}}}
+}
+}
+}
 
 #if defined (CRASHLYTICS_DEBUG)
 //! When building in debug, we can search for this symbol in the output of readelf or objdump, to verify
