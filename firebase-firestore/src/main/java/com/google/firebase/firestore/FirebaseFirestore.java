@@ -50,25 +50,30 @@ import com.google.firebase.firestore.util.Logger.Level;
 import java.util.concurrent.Executor;
 
 /**
- * Represents a Cloud Firestore database and is the entry point for all Cloud Firestore operations.
+ * Represents a Cloud Firestore database and is the entry point for all Cloud
+ * Firestore operations.
  *
- * <p><b>Subclassing Note</b>: Cloud Firestore classes are not meant to be subclassed except for use
- * in test mocks. Subclassing is not supported in production code and new SDK releases may break
- * code that does so.
+ * <p><b>Subclassing Note</b>: Cloud Firestore classes are not meant to be
+ * subclassed except for use in test mocks. Subclassing is not supported in
+ * production code and new SDK releases may break code that does so.
  */
 public class FirebaseFirestore {
 
   /**
-   * Emulator identifier. See {@link FirebaseApp#enableEmulators(EmulatorSettings)}
+   * Emulator identifier. See {@link
+   * FirebaseApp#enableEmulators(EmulatorSettings)}
    *
-   * <p>TODO(samstern): Un-hide this once Firestore, Database, and Functions are implemented
+   * <p>TODO(samstern): Un-hide this once Firestore, Database, and Functions are
+   * implemented
    *
    * @hide
    */
-  public static FirebaseEmulator EMULATOR = FirebaseEmulator.forName("firestore");
+  public static FirebaseEmulator EMULATOR =
+      FirebaseEmulator.forName("firestore");
 
   /**
-   * Provides a registry management interface for {@code FirebaseFirestore} instances.
+   * Provides a registry management interface for {@code FirebaseFirestore}
+   * instances.
    *
    * @hide
    */
@@ -79,16 +84,17 @@ public class FirebaseFirestore {
 
   private static final String TAG = "FirebaseFirestore";
   private final Context context;
-  // This is also used as private lock object for this instance. There is nothing inherent about
-  // databaseId itself that needs locking; it just saves us creating a separate lock object.
+  // This is also used as private lock object for this instance. There is
+  // nothing inherent about databaseId itself that needs locking; it just saves
+  // us creating a separate lock object.
   private final DatabaseId databaseId;
   private final String persistenceKey;
   private final CredentialsProvider credentialsProvider;
   private final AsyncQueue asyncQueue;
   private final FirebaseApp firebaseApp;
   private final UserDataReader userDataReader;
-  // When user requests to terminate, use this to notify `FirestoreMultiDbComponent` to deregister
-  // this instance.
+  // When user requests to terminate, use this to notify
+  // `FirestoreMultiDbComponent` to deregister this instance.
   private final InstanceRegistry instanceRegistry;
   private FirebaseFirestoreSettings settings;
   private volatile FirestoreClient client;
@@ -99,7 +105,8 @@ public class FirebaseFirestore {
   public static FirebaseFirestore getInstance() {
     FirebaseApp app = FirebaseApp.getInstance();
     if (app == null) {
-      throw new IllegalStateException("You must call FirebaseApp.initializeApp first.");
+      throw new IllegalStateException(
+          "You must call FirebaseApp.initializeApp first.");
     }
     return getInstance(app, DatabaseId.DEFAULT_DATABASE_ID);
   }
@@ -111,24 +118,26 @@ public class FirebaseFirestore {
 
   // TODO: make this public
   @NonNull
-  private static FirebaseFirestore getInstance(@NonNull FirebaseApp app, @NonNull String database) {
+  private static FirebaseFirestore getInstance(@NonNull FirebaseApp app,
+                                               @NonNull String database) {
     checkNotNull(app, "Provided FirebaseApp must not be null.");
-    FirestoreMultiDbComponent component = app.get(FirestoreMultiDbComponent.class);
+    FirestoreMultiDbComponent component =
+        app.get(FirestoreMultiDbComponent.class);
     checkNotNull(component, "Firestore component is not present.");
     return component.get(database);
   }
 
   @NonNull
-  static FirebaseFirestore newInstance(
-      @NonNull Context context,
-      @NonNull FirebaseApp app,
-      @Nullable InternalAuthProvider authProvider,
-      @NonNull String database,
-      @NonNull InstanceRegistry instanceRegistry,
-      @Nullable GrpcMetadataProvider metadataProvider) {
+  static FirebaseFirestore
+  newInstance(@NonNull Context context, @NonNull FirebaseApp app,
+              @Nullable InternalAuthProvider authProvider,
+              @NonNull String database,
+              @NonNull InstanceRegistry instanceRegistry,
+              @Nullable GrpcMetadataProvider metadataProvider) {
     String projectId = app.getOptions().getProjectId();
     if (projectId == null) {
-      throw new IllegalArgumentException("FirebaseOptions.getProjectId() cannot be null");
+      throw new IllegalArgumentException(
+          "FirebaseOptions.getProjectId() cannot be null");
     }
     DatabaseId databaseId = DatabaseId.forDatabase(projectId, database);
 
@@ -136,43 +145,36 @@ public class FirebaseFirestore {
 
     CredentialsProvider provider;
     if (authProvider == null) {
-      Logger.debug(TAG, "Firebase Auth not available, falling back to unauthenticated usage.");
+      Logger.debug(
+          TAG,
+          "Firebase Auth not available, falling back to unauthenticated usage.");
       provider = new EmptyCredentialsProvider();
     } else {
       provider = new FirebaseAuthCredentialsProvider(authProvider);
     }
 
-    // Firestore uses a different database for each app name. Note that we don't use
-    // app.getPersistenceKey() here because it includes the application ID which is related
-    // to the project ID. We already include the project ID when resolving the database,
-    // so there is no need to include it in the persistence key.
+    // Firestore uses a different database for each app name. Note that we don't
+    // use app.getPersistenceKey() here because it includes the application ID
+    // which is related to the project ID. We already include the project ID
+    // when resolving the database, so there is no need to include it in the
+    // persistence key.
     String persistenceKey = app.getName();
 
-    FirebaseFirestore firestore =
-        new FirebaseFirestore(
-            context,
-            databaseId,
-            persistenceKey,
-            provider,
-            queue,
-            app,
-            instanceRegistry,
-            metadataProvider,
-            app.getEmulatorSettings().getServiceSettings(EMULATOR));
+    FirebaseFirestore firestore = new FirebaseFirestore(
+        context, databaseId, persistenceKey, provider, queue, app,
+        instanceRegistry, metadataProvider,
+        app.getEmulatorSettings().getServiceSettings(EMULATOR));
     return firestore;
   }
 
   @VisibleForTesting
-  FirebaseFirestore(
-      Context context,
-      DatabaseId databaseId,
-      String persistenceKey,
-      CredentialsProvider credentialsProvider,
-      AsyncQueue asyncQueue,
-      @Nullable FirebaseApp firebaseApp,
-      InstanceRegistry instanceRegistry,
-      @Nullable GrpcMetadataProvider metadataProvider,
-      @Nullable EmulatedServiceSettings emulatorSettings) {
+  FirebaseFirestore(Context context, DatabaseId databaseId,
+                    String persistenceKey,
+                    CredentialsProvider credentialsProvider,
+                    AsyncQueue asyncQueue, @Nullable FirebaseApp firebaseApp,
+                    InstanceRegistry instanceRegistry,
+                    @Nullable GrpcMetadataProvider metadataProvider,
+                    @Nullable EmulatedServiceSettings emulatorSettings) {
     this.context = checkNotNull(context);
     this.databaseId = checkNotNull(checkNotNull(databaseId));
     this.userDataReader = new UserDataReader(databaseId);
@@ -196,21 +198,25 @@ public class FirebaseFirestore {
   }
 
   /**
-   * Sets any custom settings used to configure this {@code FirebaseFirestore} object. This method
-   * can only be called before calling any other methods on this object.
+   * Sets any custom settings used to configure this {@code FirebaseFirestore}
+   * object. This method can only be called before calling any other methods on
+   * this object.
    */
-  public void setFirestoreSettings(@NonNull FirebaseFirestoreSettings settings) {
+  public void
+  setFirestoreSettings(@NonNull FirebaseFirestoreSettings settings) {
     synchronized (databaseId) {
       checkNotNull(settings, "Provided settings must not be null.");
       settings = mergeEmulatorSettings(settings, emulatorSettings);
 
-      // As a special exception, don't throw if the same settings are passed repeatedly. This
-      // should make it simpler to get a Firestore instance in an activity.
+      // As a special exception, don't throw if the same settings are passed
+      // repeatedly. This should make it simpler to get a Firestore instance in
+      // an activity.
       if (client != null && !this.settings.equals(settings)) {
         throw new IllegalStateException(
             "FirebaseFirestore has already been started and its settings can no longer be changed. "
-                + "You can only call setFirestoreSettings() before calling any other methods on a "
-                + "FirebaseFirestore object.");
+            +
+            "You can only call setFirestoreSettings() before calling any other methods on a "
+            + "FirebaseFirestore object.");
       }
 
       this.settings = settings;
@@ -227,17 +233,18 @@ public class FirebaseFirestore {
         return;
       }
       DatabaseInfo databaseInfo =
-          new DatabaseInfo(databaseId, persistenceKey, settings.getHost(), settings.isSslEnabled());
+          new DatabaseInfo(databaseId, persistenceKey, settings.getHost(),
+                           settings.isSslEnabled());
 
-      client =
-          new FirestoreClient(
-              context, databaseInfo, settings, credentialsProvider, asyncQueue, metadataProvider);
+      client = new FirestoreClient(context, databaseInfo, settings,
+                                   credentialsProvider, asyncQueue,
+                                   metadataProvider);
     }
   }
 
-  private FirebaseFirestoreSettings mergeEmulatorSettings(
-      @NonNull FirebaseFirestoreSettings settings,
-      @Nullable EmulatedServiceSettings emulatorSettings) {
+  private FirebaseFirestoreSettings
+  mergeEmulatorSettings(@NonNull FirebaseFirestoreSettings settings,
+                        @Nullable EmulatedServiceSettings emulatorSettings) {
     if (emulatorSettings == null) {
       return settings;
     }
@@ -253,15 +260,18 @@ public class FirebaseFirestore {
         .build();
   }
 
-  /** Returns the FirebaseApp instance to which this {@code FirebaseFirestore} belongs. */
+  /**
+   * Returns the FirebaseApp instance to which this {@code FirebaseFirestore}
+   * belongs.
+   */
   @NonNull
   public FirebaseApp getApp() {
     return firebaseApp;
   }
 
   /**
-   * Gets a {@code CollectionReference} instance that refers to the collection at the specified path
-   * within the database.
+   * Gets a {@code CollectionReference} instance that refers to the collection
+   * at the specified path within the database.
    *
    * @param collectionPath A slash-separated path to a collection.
    * @return The {@code CollectionReference} instance.
@@ -270,12 +280,13 @@ public class FirebaseFirestore {
   public CollectionReference collection(@NonNull String collectionPath) {
     checkNotNull(collectionPath, "Provided collection path must not be null.");
     ensureClientConfigured();
-    return new CollectionReference(ResourcePath.fromString(collectionPath), this);
+    return new CollectionReference(ResourcePath.fromString(collectionPath),
+                                   this);
   }
 
   /**
-   * Gets a `DocumentReference` instance that refers to the document at the specified path within
-   * the database.
+   * Gets a `DocumentReference` instance that refers to the document at the
+   * specified path within the database.
    *
    * @param documentPath A slash-separated path to a document.
    * @return The DocumentReference instance.
@@ -284,87 +295,101 @@ public class FirebaseFirestore {
   public DocumentReference document(@NonNull String documentPath) {
     checkNotNull(documentPath, "Provided document path must not be null.");
     ensureClientConfigured();
-    return DocumentReference.forPath(ResourcePath.fromString(documentPath), this);
+    return DocumentReference.forPath(ResourcePath.fromString(documentPath),
+                                     this);
   }
 
   /**
-   * Creates and returns a new {@code Query} that includes all documents in the database that are
-   * contained in a collection or subcollection with the given {@code collectionId}.
+   * Creates and returns a new {@code Query} that includes all documents in the
+   * database that are contained in a collection or subcollection with the given
+   * {@code collectionId}.
    *
-   * @param collectionId Identifies the collections to query over. Every collection or subcollection
-   *     with this ID as the last segment of its path will be included. Cannot contain a slash.
+   * @param collectionId Identifies the collections to query over. Every
+   *     collection or subcollection with this ID as the last segment of its
+   *     path will be included. Cannot contain a slash.
    * @return The created Query.
    */
   @NonNull
   public Query collectionGroup(@NonNull String collectionId) {
     checkNotNull(collectionId, "Provided collection ID must not be null.");
     if (collectionId.contains("/")) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Invalid collectionId '%s'. Collection IDs must not contain '/'.", collectionId));
+      throw new IllegalArgumentException(String.format(
+          "Invalid collectionId '%s'. Collection IDs must not contain '/'.",
+          collectionId));
     }
 
     ensureClientConfigured();
-    return new Query(
-        new com.google.firebase.firestore.core.Query(ResourcePath.EMPTY, collectionId), this);
+    return new Query(new com.google.firebase.firestore.core.Query(
+                         ResourcePath.EMPTY, collectionId),
+                     this);
   }
 
   /**
-   * Executes the given updateFunction and then attempts to commit the changes applied within the
-   * transaction. If any document read within the transaction has changed, the updateFunction will
-   * be retried. If it fails to commit after 5 attempts, the transaction will fail.
+   * Executes the given updateFunction and then attempts to commit the changes
+   * applied within the transaction. If any document read within the transaction
+   * has changed, the updateFunction will be retried. If it fails to commit
+   * after 5 attempts, the transaction will fail.
    *
-   * <p>The maximum number of writes allowed in a single transaction is 500, but note that each
-   * usage of {@link FieldValue#serverTimestamp()}, {@link FieldValue#arrayUnion(Object...)}, {@link
-   * FieldValue#arrayRemove(Object...)}, or {@link FieldValue#increment(long)} inside a transaction
-   * counts as an additional write.
+   * <p>The maximum number of writes allowed in a single transaction is 500, but
+   * note that each usage of {@link FieldValue#serverTimestamp()}, {@link
+   * FieldValue#arrayUnion(Object...)}, {@link
+   * FieldValue#arrayRemove(Object...)}, or {@link FieldValue#increment(long)}
+   * inside a transaction counts as an additional write.
    *
-   * @param updateFunction The function to execute within the transaction context.
+   * @param updateFunction The function to execute within the transaction
+   *     context.
    * @param executor The executor to run the transaction callback on.
    * @return The task returned from the updateFunction.
    */
-  private <ResultT> Task<ResultT> runTransaction(
-      Transaction.Function<ResultT> updateFunction, Executor executor) {
+  private <ResultT> Task<ResultT>
+  runTransaction(Transaction.Function<ResultT> updateFunction,
+                 Executor executor) {
     ensureClientConfigured();
 
     // We wrap the function they provide in order to
     // 1. Use internal implementation classes for Transaction,
     // 2. Convert exceptions they throw into Tasks, and
     // 3. Run the user callback on the user queue.
-    Function<com.google.firebase.firestore.core.Transaction, Task<ResultT>> wrappedUpdateFunction =
-        internalTransaction ->
-            Tasks.call(
-                executor,
-                () ->
-                    updateFunction.apply(
-                        new Transaction(internalTransaction, FirebaseFirestore.this)));
+    Function<com.google.firebase.firestore.core.Transaction, Task<ResultT>>
+        wrappedUpdateFunction = internalTransaction
+        -> Tasks.call(executor,
+                      ()
+                          -> updateFunction.apply(new Transaction(
+                              internalTransaction, FirebaseFirestore.this)));
 
     return client.transaction(wrappedUpdateFunction);
   }
 
   /**
-   * Executes the given updateFunction and then attempts to commit the changes applied within the
-   * transaction. If any document read within the transaction has changed, the updateFunction will
-   * be retried. If it fails to commit after 5 attempts, the transaction will fail.
+   * Executes the given updateFunction and then attempts to commit the changes
+   * applied within the transaction. If any document read within the transaction
+   * has changed, the updateFunction will be retried. If it fails to commit
+   * after 5 attempts, the transaction will fail.
    *
-   * @param updateFunction The function to execute within the transaction context.
+   * @param updateFunction The function to execute within the transaction
+   *     context.
    * @return The task returned from the updateFunction.
    */
   @NonNull
-  public <TResult> Task<TResult> runTransaction(
-      @NonNull Transaction.Function<TResult> updateFunction) {
-    checkNotNull(updateFunction, "Provided transaction update function must not be null.");
+  public <TResult> Task<TResult>
+  runTransaction(@NonNull Transaction.Function<TResult> updateFunction) {
+    checkNotNull(updateFunction,
+                 "Provided transaction update function must not be null.");
     return runTransaction(
-        updateFunction, com.google.firebase.firestore.core.Transaction.getDefaultExecutor());
+        updateFunction,
+        com.google.firebase.firestore.core.Transaction.getDefaultExecutor());
   }
 
   /**
-   * Creates a write batch, used for performing multiple writes as a single atomic operation.
+   * Creates a write batch, used for performing multiple writes as a single
+   * atomic operation.
    *
-   * <p>The maximum number of writes allowed in a single batch is 500, but note that each usage of
-   * {@link FieldValue#serverTimestamp()}, {@link FieldValue#arrayUnion(Object...)}, {@link
-   * FieldValue#arrayRemove(Object...)}, or {@link FieldValue#increment(long)} inside a transaction
-   * counts as an additional write.
+   * <p>The maximum number of writes allowed in a single batch is 500, but note
+   * that each usage of
+   * {@link FieldValue#serverTimestamp()}, {@link
+   * FieldValue#arrayUnion(Object...)}, {@link
+   * FieldValue#arrayRemove(Object...)}, or {@link FieldValue#increment(long)}
+   * inside a transaction counts as an additional write.
    *
    * @return The created WriteBatch object.
    */
@@ -376,8 +401,9 @@ public class FirebaseFirestore {
   }
 
   /**
-   * Executes a batchFunction on a newly created {@link WriteBatch} and then commits all of the
-   * writes made by the batchFunction as a single atomic unit.
+   * Executes a batchFunction on a newly created {@link WriteBatch} and then
+   * commits all of the writes made by the batchFunction as a single atomic
+   * unit.
    *
    * @param batchFunction The function to execute within the batch context.
    * @return A Task that will be resolved when the batch has been committed.
@@ -390,7 +416,8 @@ public class FirebaseFirestore {
   }
 
   Task<Void> terminateInternal() {
-    // The client must be initialized to ensure that all subsequent API usage throws an exception.
+    // The client must be initialized to ensure that all subsequent API usage
+    // throws an exception.
     this.ensureClientConfigured();
     return client.terminate();
   }
@@ -398,22 +425,27 @@ public class FirebaseFirestore {
   /**
    * Terminates this {@code FirebaseFirestore} instance.
    *
-   * <p>After calling {@code terminate()} only the {@link #clearPersistence()} method may be used.
-   * Any other method will throw an {@link IllegalStateException}.
+   * <p>After calling {@code terminate()} only the {@link #clearPersistence()}
+   * method may be used. Any other method will throw an {@link
+   * IllegalStateException}.
    *
-   * <p>To restart after termination, simply create a new instance of {@code FirebaseFirestore} with
+   * <p>To restart after termination, simply create a new instance of {@code
+   * FirebaseFirestore} with
    * {@link #getInstance()} or {@link #getInstance(FirebaseApp)}.
    *
-   * <p>{@code terminate()} does not cancel any pending writes and any tasks that are awaiting a
-   * response from the server will not be resolved. The next time you start this instance, it will
-   * resume attempting to send these writes to the server.
+   * <p>{@code terminate()} does not cancel any pending writes and any tasks
+   * that are awaiting a response from the server will not be resolved. The next
+   * time you start this instance, it will resume attempting to send these
+   * writes to the server.
    *
-   * <p>Note: Under normal circumstances, calling {@code terminate()} is not required. This method
-   * is useful only when you want to force this instance to release all of its resources or in
-   * combination with {@link #clearPersistence} to ensure that all local state is destroyed between
-   * test runs.
+   * <p>Note: Under normal circumstances, calling {@code terminate()} is not
+   * required. This method is useful only when you want to force this instance
+   * to release all of its resources or in combination with {@link
+   * #clearPersistence} to ensure that all local state is destroyed between test
+   * runs.
    *
-   * @return A {@code Task} that is resolved when the instance has been successfully terminated.
+   * @return A {@code Task} that is resolved when the instance has been
+   *     successfully terminated.
    */
   @NonNull
   public Task<Void> terminate() {
@@ -422,18 +454,21 @@ public class FirebaseFirestore {
   }
 
   /**
-   * Waits until all currently pending writes for the active user have been acknowledged by the
-   * backend.
+   * Waits until all currently pending writes for the active user have been
+   * acknowledged by the backend.
    *
-   * <p>The returned Task completes immediately if there are no outstanding writes. Otherwise, the
-   * Task waits for all previously issued writes (including those written in a previous app
-   * session), but it does not wait for writes that were added after the method is called. If you
-   * wish to wait for additional writes, you have to call {@code waitForPendingWrites()} again.
+   * <p>The returned Task completes immediately if there are no outstanding
+   * writes. Otherwise, the Task waits for all previously issued writes
+   * (including those written in a previous app session), but it does not wait
+   * for writes that were added after the method is called. If you wish to wait
+   * for additional writes, you have to call {@code waitForPendingWrites()}
+   * again.
    *
-   * <p>Any outstanding {@code waitForPendingWrites()} Tasks are cancelled during user changes.
+   * <p>Any outstanding {@code waitForPendingWrites()} Tasks are cancelled
+   * during user changes.
    *
-   * @return A {@code Task} which resolves when all currently pending writes have been acknowledged
-   *     by the backend.
+   * @return A {@code Task} which resolves when all currently pending writes
+   *     have been acknowledged by the backend.
    */
   @NonNull
   public Task<Void> waitForPendingWrites() {
@@ -446,7 +481,8 @@ public class FirebaseFirestore {
   }
 
   /**
-   * Re-enables network usage for this instance after a prior call to {@link #disableNetwork()}.
+   * Re-enables network usage for this instance after a prior call to {@link
+   * #disableNetwork()}.
    *
    * @return A Task that will be completed once networking is enabled.
    */
@@ -457,9 +493,10 @@ public class FirebaseFirestore {
   }
 
   /**
-   * Disables network access for this instance. While the network is disabled, any snapshot
-   * listeners or {@code get()} calls will return results from cache, and any write operations will
-   * be queued until network usage is re-enabled via a call to {@link #enableNetwork()}.
+   * Disables network access for this instance. While the network is disabled,
+   * any snapshot listeners or {@code get()} calls will return results from
+   * cache, and any write operations will be queued until network usage is
+   * re-enabled via a call to {@link #enableNetwork()}.
    *
    * @return A Task that will be completed once networking is disabled.
    */
@@ -479,101 +516,109 @@ public class FirebaseFirestore {
   }
 
   /**
-   * Clears the persistent storage, including pending writes and cached documents.
+   * Clears the persistent storage, including pending writes and cached
+   * documents.
    *
-   * <p>Must be called while the {@code FirebaseFirestore} instance is not started (after the app is
-   * shutdown or when the app is first initialized). On startup, this method must be called before
-   * other methods (other than {@link #setFirestoreSettings(FirebaseFirestoreSettings)}). If the
-   * {@code FirebaseFirestore} instance is still running, the {@code Task} will fail with an error
-   * code of {@code FAILED_PRECONDITION}.
+   * <p>Must be called while the {@code FirebaseFirestore} instance is not
+   * started (after the app is shutdown or when the app is first initialized).
+   * On startup, this method must be called before other methods (other than
+   * {@link #setFirestoreSettings(FirebaseFirestoreSettings)}). If the
+   * {@code FirebaseFirestore} instance is still running, the {@code Task} will
+   * fail with an error code of {@code FAILED_PRECONDITION}.
    *
-   * <p>Note: {@code clearPersistence()} is primarily intended to help write reliable tests that use
-   * Cloud Firestore. It uses an efficient mechanism for dropping existing data but does not attempt
-   * to securely overwrite or otherwise make cached data unrecoverable. For applications that are
-   * sensitive to the disclosure of cached data in between user sessions, we strongly recommend not
-   * enabling persistence at all.
+   * <p>Note: {@code clearPersistence()} is primarily intended to help write
+   * reliable tests that use Cloud Firestore. It uses an efficient mechanism for
+   * dropping existing data but does not attempt to securely overwrite or
+   * otherwise make cached data unrecoverable. For applications that are
+   * sensitive to the disclosure of cached data in between user sessions, we
+   * strongly recommend not enabling persistence at all.
    *
-   * @return A {@code Task} that is resolved when the persistent storage is cleared. Otherwise, the
+   * @return A {@code Task} that is resolved when the persistent storage is
+   *     cleared. Otherwise, the
    *     {@code Task} is rejected with an error.
    */
   @NonNull
   public Task<Void> clearPersistence() {
     final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
-    asyncQueue.enqueueAndForgetEvenAfterShutdown(
-        () -> {
-          try {
-            if (client != null && !client.isTerminated()) {
-              throw new FirebaseFirestoreException(
-                  "Persistence cannot be cleared while the firestore instance is running.",
-                  Code.FAILED_PRECONDITION);
-            }
-            SQLitePersistence.clearPersistence(context, databaseId, persistenceKey);
-            source.setResult(null);
-          } catch (FirebaseFirestoreException e) {
-            source.setException(e);
-          }
-        });
+    asyncQueue.enqueueAndForgetEvenAfterShutdown(() -> {
+      try {
+        if (client != null && !client.isTerminated()) {
+          throw new FirebaseFirestoreException(
+              "Persistence cannot be cleared while the firestore instance is running.",
+              Code.FAILED_PRECONDITION);
+        }
+        SQLitePersistence.clearPersistence(context, databaseId, persistenceKey);
+        source.setResult(null);
+      } catch (FirebaseFirestoreException e) {
+        source.setException(e);
+      }
+    });
     return source.getTask();
   }
 
   /**
-   * Attaches a listener for a snapshots-in-sync event. The snapshots-in-sync event indicates that
-   * all listeners affected by a given change have fired, even if a single server-generated change
-   * affects multiple listeners.
+   * Attaches a listener for a snapshots-in-sync event. The snapshots-in-sync
+   * event indicates that all listeners affected by a given change have fired,
+   * even if a single server-generated change affects multiple listeners.
    *
-   * <p>NOTE: The snapshots-in-sync event only indicates that listeners are in sync with each other,
-   * but does not relate to whether those snapshots are in sync with the server. Use
-   * SnapshotMetadata in the individual listeners to determine if a snapshot is from the cache or
-   * the server.
+   * <p>NOTE: The snapshots-in-sync event only indicates that listeners are in
+   * sync with each other, but does not relate to whether those snapshots are in
+   * sync with the server. Use SnapshotMetadata in the individual listeners to
+   * determine if a snapshot is from the cache or the server.
    *
-   * @param runnable A callback to be called every time all snapshot listeners are in sync with each
-   *     other.
+   * @param runnable A callback to be called every time all snapshot listeners
+   *     are in sync with each other.
    * @return A registration object that can be used to remove the listener.
    */
   @NonNull
-  public ListenerRegistration addSnapshotsInSyncListener(@NonNull Runnable runnable) {
-    return addSnapshotsInSyncListener(Executors.DEFAULT_CALLBACK_EXECUTOR, runnable);
+  public ListenerRegistration
+  addSnapshotsInSyncListener(@NonNull Runnable runnable) {
+    return addSnapshotsInSyncListener(Executors.DEFAULT_CALLBACK_EXECUTOR,
+                                      runnable);
   }
 
   /**
-   * Attaches a listener for a snapshots-in-sync event. The snapshots-in-sync event indicates that
-   * all listeners affected by a given change have fired, even if a single server-generated change
-   * affects multiple listeners.
+   * Attaches a listener for a snapshots-in-sync event. The snapshots-in-sync
+   * event indicates that all listeners affected by a given change have fired,
+   * even if a single server-generated change affects multiple listeners.
    *
-   * <p>NOTE: The snapshots-in-sync event only indicates that listeners are in sync with each other,
-   * but does not relate to whether those snapshots are in sync with the server. Use
-   * SnapshotMetadata in the individual listeners to determine if a snapshot is from the cache or
-   * the server.
+   * <p>NOTE: The snapshots-in-sync event only indicates that listeners are in
+   * sync with each other, but does not relate to whether those snapshots are in
+   * sync with the server. Use SnapshotMetadata in the individual listeners to
+   * determine if a snapshot is from the cache or the server.
    *
    * @param activity The activity to scope the listener to.
-   * @param runnable A callback to be called every time all snapshot listeners are in sync with each
-   *     other.
+   * @param runnable A callback to be called every time all snapshot listeners
+   *     are in sync with each other.
    * @return A registration object that can be used to remove the listener.
    */
   @NonNull
-  public ListenerRegistration addSnapshotsInSyncListener(
-      @NonNull Activity activity, @NonNull Runnable runnable) {
-    return addSnapshotsInSyncListener(Executors.DEFAULT_CALLBACK_EXECUTOR, activity, runnable);
+  public ListenerRegistration
+  addSnapshotsInSyncListener(@NonNull Activity activity,
+                             @NonNull Runnable runnable) {
+    return addSnapshotsInSyncListener(Executors.DEFAULT_CALLBACK_EXECUTOR,
+                                      activity, runnable);
   }
 
   /**
-   * Attaches a listener for a snapshots-in-sync event. The snapshots-in-sync event indicates that
-   * all listeners affected by a given change have fired, even if a single server-generated change
-   * affects multiple listeners.
+   * Attaches a listener for a snapshots-in-sync event. The snapshots-in-sync
+   * event indicates that all listeners affected by a given change have fired,
+   * even if a single server-generated change affects multiple listeners.
    *
-   * <p>NOTE: The snapshots-in-sync event only indicates that listeners are in sync with each other,
-   * but does not relate to whether those snapshots are in sync with the server. Use
-   * SnapshotMetadata in the individual listeners to determine if a snapshot is from the cache or
-   * the server.
+   * <p>NOTE: The snapshots-in-sync event only indicates that listeners are in
+   * sync with each other, but does not relate to whether those snapshots are in
+   * sync with the server. Use SnapshotMetadata in the individual listeners to
+   * determine if a snapshot is from the cache or the server.
    *
    * @param executor The executor to use to call the listener.
-   * @param runnable A callback to be called every time all snapshot listeners are in sync with each
-   *     other.
+   * @param runnable A callback to be called every time all snapshot listeners
+   *     are in sync with each other.
    * @return A registration object that can be used to remove the listener.
    */
   @NonNull
-  public ListenerRegistration addSnapshotsInSyncListener(
-      @NonNull Executor executor, @NonNull Runnable runnable) {
+  public ListenerRegistration
+  addSnapshotsInSyncListener(@NonNull Executor executor,
+                             @NonNull Runnable runnable) {
     return addSnapshotsInSyncListener(executor, null, runnable);
   }
 
@@ -584,44 +629,38 @@ public class FirebaseFirestore {
    *
    * @param userExecutor The executor to use to call the listener.
    * @param activity Optional activity this listener is scoped to.
-   * @param runnable A callback to be called every time all snapshot listeners are in sync with each
-   *     other.
+   * @param runnable A callback to be called every time all snapshot listeners
+   *     are in sync with each other.
    * @return A registration object that can be used to remove the listener.
    */
-  private ListenerRegistration addSnapshotsInSyncListener(
-      Executor userExecutor, @Nullable Activity activity, @NonNull Runnable runnable) {
+  private ListenerRegistration
+  addSnapshotsInSyncListener(Executor userExecutor, @Nullable Activity activity,
+                             @NonNull Runnable runnable) {
     ensureClientConfigured();
     EventListener<Void> eventListener =
         (Void v, FirebaseFirestoreException error) -> {
-          hardAssert(error == null, "snapshots-in-sync listeners should never get errors.");
-          runnable.run();
-        };
+      hardAssert(error == null,
+                 "snapshots-in-sync listeners should never get errors.");
+      runnable.run();
+    };
     AsyncEventListener<Void> asyncListener =
         new AsyncEventListener<Void>(userExecutor, eventListener);
     client.addSnapshotsInSyncListener(asyncListener);
-    return ActivityScope.bind(
-        activity,
-        () -> {
-          asyncListener.mute();
-          client.removeSnapshotsInSyncListener(asyncListener);
-        });
+    return ActivityScope.bind(activity, () -> {
+      asyncListener.mute();
+      client.removeSnapshotsInSyncListener(asyncListener);
+    });
   }
 
-  FirestoreClient getClient() {
-    return client;
-  }
+  FirestoreClient getClient() { return client; }
 
-  DatabaseId getDatabaseId() {
-    return databaseId;
-  }
+  DatabaseId getDatabaseId() { return databaseId; }
 
-  UserDataReader getUserDataReader() {
-    return userDataReader;
-  }
+  UserDataReader getUserDataReader() { return userDataReader; }
 
   /**
-   * Helper to validate a {@code DocumentReference}. Used by {@link WriteBatch} and {@link
-   * Transaction}.
+   * Helper to validate a {@code DocumentReference}. Used by {@link WriteBatch}
+   * and {@link Transaction}.
    */
   void validateReference(DocumentReference docRef) {
     checkNotNull(docRef, "Provided DocumentReference must not be null.");

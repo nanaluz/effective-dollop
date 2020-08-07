@@ -31,7 +31,8 @@ public class DataCollectionArbiter {
 
   // State for waitForDataCollectionEnabled().
   private Object taskLock = new Object();
-  TaskCompletionSource<Void> dataCollectionEnabledTask = new TaskCompletionSource<>();
+  TaskCompletionSource<Void> dataCollectionEnabledTask =
+      new TaskCompletionSource<>();
   boolean taskResolved = false;
 
   private final SharedPreferences sharedPreferences;
@@ -40,8 +41,8 @@ public class DataCollectionArbiter {
   private final FirebaseApp firebaseApp;
 
   /**
-   * A Task that will be resolved when explicit data collection permission is granted by calling
-   * grantDataCollectionPermission.
+   * A Task that will be resolved when explicit data collection permission is
+   * granted by calling grantDataCollectionPermission.
    */
   private TaskCompletionSource<Void> dataCollectionExplicitlyApproved =
       new TaskCompletionSource<>();
@@ -59,26 +60,31 @@ public class DataCollectionArbiter {
     boolean explicitlySet = false;
 
     if (sharedPreferences.contains(FIREBASE_CRASHLYTICS_COLLECTION_ENABLED)) {
-      enabled = sharedPreferences.getBoolean(FIREBASE_CRASHLYTICS_COLLECTION_ENABLED, true);
+      enabled = sharedPreferences.getBoolean(
+          FIREBASE_CRASHLYTICS_COLLECTION_ENABLED, true);
       explicitlySet = true;
     } else {
       try {
-        final PackageManager packageManager = applicationContext.getPackageManager();
+        final PackageManager packageManager =
+            applicationContext.getPackageManager();
         if (packageManager != null) {
           final ApplicationInfo applicationInfo =
               packageManager.getApplicationInfo(
-                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
-          if (applicationInfo != null
-              && applicationInfo.metaData != null
-              && applicationInfo.metaData.containsKey(FIREBASE_CRASHLYTICS_COLLECTION_ENABLED)) {
-            enabled = applicationInfo.metaData.getBoolean(FIREBASE_CRASHLYTICS_COLLECTION_ENABLED);
+                  applicationContext.getPackageName(),
+                  PackageManager.GET_META_DATA);
+          if (applicationInfo != null && applicationInfo.metaData != null &&
+              applicationInfo.metaData.containsKey(
+                  FIREBASE_CRASHLYTICS_COLLECTION_ENABLED)) {
+            enabled = applicationInfo.metaData.getBoolean(
+                FIREBASE_CRASHLYTICS_COLLECTION_ENABLED);
             explicitlySet = true;
           }
         }
       } catch (PackageManager.NameNotFoundException e) {
-        // This shouldn't happen since it's this app's package, but fall through to default
-        // if so.
-        Logger.getLogger().d("Unable to get PackageManager. Falling through", e);
+        // This shouldn't happen since it's this app's package, but fall through
+        // to default if so.
+        Logger.getLogger().d("Unable to get PackageManager. Falling through",
+                             e);
       }
     }
 
@@ -101,16 +107,16 @@ public class DataCollectionArbiter {
   }
 
   public Task<Void> waitForAutomaticDataCollectionEnabled() {
-    synchronized (taskLock) {
-      return dataCollectionEnabledTask.getTask();
-    }
+    synchronized (taskLock) { return dataCollectionEnabledTask.getTask(); }
   }
 
   @SuppressLint({"CommitPrefEdits", "ApplySharedPref"})
   public void setCrashlyticsDataCollectionEnabled(boolean enabled) {
     crashlyticsDataCollectionEnabled = enabled;
     crashlyticsDataCollectionExplicitlySet = true;
-    sharedPreferences.edit().putBoolean(FIREBASE_CRASHLYTICS_COLLECTION_ENABLED, enabled).commit();
+    sharedPreferences.edit()
+        .putBoolean(FIREBASE_CRASHLYTICS_COLLECTION_ENABLED, enabled)
+        .commit();
 
     synchronized (taskLock) {
       if (enabled) {
@@ -128,25 +134,28 @@ public class DataCollectionArbiter {
   }
 
   /**
-   * Returns a task which will be resolved when either: 1) automatic data collection has been
-   * enabled, or 2) grantDataCollectionPermission has been called.
+   * Returns a task which will be resolved when either: 1) automatic data
+   * collection has been enabled, or 2) grantDataCollectionPermission has been
+   * called.
    */
   public Task<Void> waitForDataCollectionPermission() {
-    return Utils.race(
-        dataCollectionExplicitlyApproved.getTask(), waitForAutomaticDataCollectionEnabled());
+    return Utils.race(dataCollectionExplicitlyApproved.getTask(),
+                      waitForAutomaticDataCollectionEnabled());
   }
 
   /**
-   * Signals that explicit permission to collection data has been granted by the user, which will
-   * allow fetching settings and doing onboarding even if automatic data collection is disabled.
-   * This method should only be called for operations that are necessary to collect data in order to
-   * ensure crash reports get uploaded properly.
+   * Signals that explicit permission to collection data has been granted by the
+   * user, which will allow fetching settings and doing onboarding even if
+   * automatic data collection is disabled. This method should only be called
+   * for operations that are necessary to collect data in order to ensure crash
+   * reports get uploaded properly.
    *
    * @param dataCollectionToken a valid data collection
    */
   public void grantDataCollectionPermission(boolean dataCollectionToken) {
     if (!dataCollectionToken) {
-      throw new IllegalStateException("An invalid data collection token was used.");
+      throw new IllegalStateException(
+          "An invalid data collection token was used.");
     }
     dataCollectionExplicitlyApproved.trySetResult(null);
   }

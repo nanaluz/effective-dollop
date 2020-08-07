@@ -24,9 +24,11 @@ import java.util.Map;
 /** Multi-resource container for Functions. */
 class FunctionsMultiResourceComponent {
   /**
-   * A static map from instance key to FirebaseFunctions instances. Instance keys region names.
+   * A static map from instance key to FirebaseFunctions instances. Instance
+   * keys region names.
    *
-   * <p>To ensure thread safety it should only be accessed when it is being synchronized on.
+   * <p>To ensure thread safety it should only be accessed when it is being
+   * synchronized on.
    */
   @GuardedBy("this")
   private final Map<String, FirebaseFunctions> instances = new HashMap<>();
@@ -35,8 +37,9 @@ class FunctionsMultiResourceComponent {
   private final ContextProvider contextProvider;
   private final FirebaseApp app;
 
-  FunctionsMultiResourceComponent(
-      Context applicationContext, ContextProvider contextProvider, FirebaseApp app) {
+  FunctionsMultiResourceComponent(Context applicationContext,
+                                  ContextProvider contextProvider,
+                                  FirebaseApp app) {
     this.applicationContext = applicationContext;
     this.contextProvider = contextProvider;
     this.app = app;
@@ -46,12 +49,12 @@ class FunctionsMultiResourceComponent {
     FirebaseFunctions functions = instances.get(region);
     String projectId = app.getOptions().getProjectId();
     EmulatedServiceSettings emulatorSettings =
-        app.getEmulatorSettings().getServiceSettings(FirebaseFunctions.EMULATOR);
+        app.getEmulatorSettings().getServiceSettings(
+            FirebaseFunctions.EMULATOR);
 
     if (functions == null) {
-      functions =
-          new FirebaseFunctions(
-              applicationContext, projectId, region, contextProvider, emulatorSettings);
+      functions = new FirebaseFunctions(applicationContext, projectId, region,
+                                        contextProvider, emulatorSettings);
       instances.put(region, functions);
     }
     return functions;

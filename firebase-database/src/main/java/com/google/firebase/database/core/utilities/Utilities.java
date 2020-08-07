@@ -38,20 +38,23 @@ public class Utilities {
     return Utilities.parseUrl(url, null);
   }
 
-  public static ParsedUrl parseUrl(
-      @NonNull String url, @Nullable EmulatedServiceSettings emulatorSettings)
+  public static ParsedUrl
+  parseUrl(@NonNull String url,
+           @Nullable EmulatedServiceSettings emulatorSettings)
       throws DatabaseException {
     try {
       Uri uri = Uri.parse(url);
 
       String scheme = uri.getScheme();
       if (scheme == null) {
-        throw new IllegalArgumentException("Database URL does not specify a URL scheme");
+        throw new IllegalArgumentException(
+            "Database URL does not specify a URL scheme");
       }
 
       String host = uri.getHost();
       if (host == null) {
-        throw new IllegalArgumentException("Database URL does not specify a valid host");
+        throw new IllegalArgumentException(
+            "Database URL does not specify a valid host");
       }
 
       String namespace = uri.getQueryParameter("ns");
@@ -62,7 +65,8 @@ public class Utilities {
 
       RepoInfo repoInfo = new RepoInfo();
       if (emulatorSettings != null) {
-        repoInfo.host = emulatorSettings.getHost() + ":" + emulatorSettings.getPort();
+        repoInfo.host =
+            emulatorSettings.getHost() + ":" + emulatorSettings.getPort();
         repoInfo.secure = false;
       } else {
         repoInfo.host = host.toLowerCase();
@@ -90,18 +94,20 @@ public class Utilities {
 
       return parsedUrl;
     } catch (Exception e) {
-      throw new DatabaseException("Invalid Firebase Database url specified: " + url, e);
+      throw new DatabaseException(
+          "Invalid Firebase Database url specified: " + url, e);
     }
   }
 
   /**
-   * Extracts the path string from the original URL without changing the encoding (unlike
-   * Uri.getPath()).
+   * Extracts the path string from the original URL without changing the
+   * encoding (unlike Uri.getPath()).
    */
   private static String extractPathString(String originalUrl) {
     int schemeOffset = originalUrl.indexOf("//");
     if (schemeOffset == -1) {
-      throw new DatabaseException("Firebase Database URL is missing URL scheme");
+      throw new DatabaseException(
+          "Firebase Database URL is missing URL scheme");
     }
 
     String urlWithoutScheme = originalUrl.substring(schemeOffset + 2);
@@ -127,7 +133,8 @@ public class Utilities {
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException("Missing SHA-1 MessageDigest provider.", e);
     } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException("UTF-8 encoding is required for Firebase Database to run!");
+      throw new RuntimeException(
+          "UTF-8 encoding is required for Firebase Database to run!");
     }
   }
 
@@ -147,7 +154,7 @@ public class Utilities {
     long bits = Double.doubleToLongBits(value);
     // We use big-endian to encode the bytes
     for (int i = 7; i >= 0; i--) {
-      int byteValue = (int) ((bits >>> (8 * i)) & 0xff);
+      int byteValue = (int)((bits >>> (8 * i)) & 0xff);
       int high = ((byteValue >> 4) & 0xf);
       int low = (byteValue & 0xf);
       sb.append(HEX_CHARACTERS[high]);
@@ -156,8 +163,8 @@ public class Utilities {
     return sb.toString();
   }
 
-  // NOTE: We could use Ints.tryParse from guava, but I don't feel like pulling in guava (~2mb) for
-  // that small purpose.
+  // NOTE: We could use Ints.tryParse from guava, but I don't feel like pulling
+  // in guava (~2mb) for that small purpose.
   public static Integer tryParseInt(String num) {
     if (num.length() > 11 || num.length() == 0) {
       return null;
@@ -185,13 +192,13 @@ public class Utilities {
       if (-number < Integer.MIN_VALUE) {
         return null;
       } else {
-        return (int) -number;
+        return (int)-number;
       }
     } else {
       if (number > Integer.MAX_VALUE) {
         return null;
       }
-      return (int) number;
+      return (int)number;
     }
   }
 
@@ -217,7 +224,7 @@ public class Utilities {
 
   public static <C> C castOrNull(Object o, Class<C> clazz) {
     if (clazz.isAssignableFrom(o.getClass())) {
-      return (C) o;
+      return (C)o;
     } else {
       return null;
     }
@@ -246,8 +253,8 @@ public class Utilities {
     }
   }
 
-  public static Pair<Task<Void>, DatabaseReference.CompletionListener> wrapOnComplete(
-      DatabaseReference.CompletionListener optListener) {
+  public static Pair<Task<Void>, DatabaseReference.CompletionListener>
+  wrapOnComplete(DatabaseReference.CompletionListener optListener) {
     if (optListener == null) {
       final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
       DatabaseReference.CompletionListener listener =
