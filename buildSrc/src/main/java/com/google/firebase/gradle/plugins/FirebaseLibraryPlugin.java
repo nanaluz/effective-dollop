@@ -102,8 +102,7 @@ public class FirebaseLibraryPlugin implements Plugin<Project> {
                     .setFreeCompilerArgs(
                         ImmutableList.of("-module-name", kotlinModuleName(project))));
 
-
-    Dokka.configure(project, android, firebaseLibrary);
+    project.afterEvaluate(p -> Dokka.configure(project, android, firebaseLibrary));
   }
 
   private static void setupApiInformationAnalysis(Project project, LibraryExtension android) {
