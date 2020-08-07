@@ -17,28 +17,34 @@ package com.google.firebase.emulators;
 import androidx.annotation.NonNull;
 
 /**
- * Settings to connect a single Firebase service to a local emulator.
+ * Identifier Firebase services that can be emulated using the Firebase Emulator Suite.
  *
  * <p>TODO(samstern): Un-hide this once Firestore, Database, and Functions are implemented
  *
+ * @see com.google.firebase.FirebaseApp#enableEmulators(EmulatorSettings)
  * @see EmulatorSettings
+ * @see EmulatedServiceSettings
  * @hide
  */
-public final class EmulatedServiceSettings {
+public final class FirebaseEmulator {
 
-  private final String host;
-  private final int port;
+  private final String name;
 
-  public EmulatedServiceSettings(@NonNull String host, int port) {
-    this.host = host;
-    this.port = port;
+  /**
+   * Only to be called by SDKs which support emulators in order to make constants.
+   *
+   * @hide
+   */
+  @NonNull
+  public static FirebaseEmulator forName(String name) {
+    return new FirebaseEmulator(name);
   }
 
-  public String getHost() {
-    return host;
+  private FirebaseEmulator(String name) {
+    this.name = name;
   }
 
-  public int getPort() {
-    return port;
+  public String getName() {
+    return name;
   }
 }

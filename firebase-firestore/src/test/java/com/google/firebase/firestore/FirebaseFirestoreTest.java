@@ -23,6 +23,8 @@ import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.emulators.EmulatedServiceSettings;
+import com.google.firebase.emulators.EmulatorSettings;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -36,8 +38,13 @@ public class FirebaseFirestoreTest {
   public void getInstance_withEmulator() {
     FirebaseApp app = getApp("getInstance_withEmulator");
 
+    app.enableEmulators(
+        new EmulatorSettings.Builder()
+            .addEmulatedService(
+                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .build());
+
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
-    firestore.useEmulator("10.0.2.2", 8080);
     FirebaseFirestoreSettings settings = firestore.getFirestoreSettings();
 
     assertEquals(settings.getHost(), "10.0.2.2:8080");
@@ -47,9 +54,13 @@ public class FirebaseFirestoreTest {
   @Test
   public void getInstance_withEmulator_mergeSettingsSuccess() {
     FirebaseApp app = getApp("getInstance_withEmulator_mergeSettingsSuccess");
+    app.enableEmulators(
+        new EmulatorSettings.Builder()
+            .addEmulatedService(
+                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .build());
 
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
-    firestore.useEmulator("10.0.2.2", 8080);
     firestore.setFirestoreSettings(
         new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build());
 
@@ -61,19 +72,24 @@ public class FirebaseFirestoreTest {
   }
 
   @Test
-  public void getInstance_withEmulator_lateFailure() {
-    FirebaseApp app = getApp("getInstance_withEmulator_lateFailure");
+  public void getInstance_withEmulator_mergeSettingsFailure() {
+    FirebaseApp app = getApp("getInstance_withEmulator_mergeSettingsFailure");
+    app.enableEmulators(
+        new EmulatorSettings.Builder()
+            .addEmulatedService(
+                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .build());
 
     try {
       FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
-      CollectionReference ref = firestore.collection("foo");
-
-      firestore.useEmulator("10.0.2.2", 8080);
+      firestore.setFirestoreSettings(
+          new FirebaseFirestoreSettings.Builder().setHost("myhost.com").build());
       fail("Exception should be thrown");
     } catch (Exception e) {
       assertTrue(e instanceof IllegalStateException);
       assertEquals(
-          e.getMessage(), "Cannot call useEmulator() after instance has already been initialized.");
+          e.getMessage(),
+          "Cannot specify the host in FirebaseFirestoreSettings when EmulatedServiceSettings is provided.");
     }
   }
 
@@ -96,9 +112,13 @@ public class FirebaseFirestoreTest {
   @Test
   public void setSettings_repeatedSuccess_withEmulator() {
     FirebaseApp app = getApp("setSettings_repeatedSuccess_withEmulator");
+    app.enableEmulators(
+        new EmulatorSettings.Builder()
+            .addEmulatedService(
+                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .build());
 
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
-    firestore.useEmulator("10.0.2.2", 8080);
 
     FirebaseFirestoreSettings settings =
         new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build();

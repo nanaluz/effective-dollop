@@ -247,7 +247,7 @@ public class CrashlyticsCore {
 
   // endregion
 
-  public void setCrashlyticsCollectionEnabled(Boolean enabled) {
+  public void setCrashlyticsCollectionEnabled(boolean enabled) {
     dataCollectionArbiter.setCrashlyticsDataCollectionEnabled(enabled);
   }
 

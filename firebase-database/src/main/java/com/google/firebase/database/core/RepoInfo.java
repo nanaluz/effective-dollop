@@ -14,8 +14,6 @@
 
 package com.google.firebase.database.core;
 
-import com.google.firebase.database.annotations.Nullable;
-import com.google.firebase.emulators.EmulatedServiceSettings;
 import java.net.URI;
 
 public final class RepoInfo {
@@ -61,16 +59,6 @@ public final class RepoInfo {
       url += "&" + LAST_SESSION_ID_PARAM + "=" + optLastSessionId;
     }
     return URI.create(url);
-  }
-
-  public void applyEmulatorSettings(@Nullable EmulatedServiceSettings settings) {
-    if (settings == null) {
-      return;
-    }
-
-    this.host = settings.getHost() + ":" + settings.getPort();
-    this.internalHost = this.host;
-    this.secure = false;
   }
 
   public boolean isCacheableHost() {
