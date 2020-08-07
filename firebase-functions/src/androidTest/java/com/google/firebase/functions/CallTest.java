@@ -65,7 +65,7 @@ public class CallTest {
     Object actual = Tasks.await(result).getData();
 
     assertTrue(actual instanceof Map);
-    Map<String, ?> map = (Map<String, ?>) actual;
+    Map<String, ?> map = (Map<String, ?>)actual;
     assertEquals("stub response", map.get("message"));
     assertEquals(42, map.get("code"));
     assertEquals(420L, map.get("long"));
@@ -84,17 +84,15 @@ public class CallTest {
 
   @Test
   public void testToken() throws InterruptedException, ExecutionException {
-    // Override the normal token provider to simulate FirebaseAuth being logged in.
-    FirebaseFunctions functions =
-        new FirebaseFunctions(
-            app.getApplicationContext(),
-            app.getOptions().getProjectId(),
-            "us-central1",
-            () -> {
-              HttpsCallableContext context = new HttpsCallableContext("token", null);
-              return Tasks.forResult(context);
-            },
-            NO_EMULATOR);
+    // Override the normal token provider to simulate FirebaseAuth being logged
+    // in.
+    FirebaseFunctions functions = new FirebaseFunctions(
+        app.getApplicationContext(), app.getOptions().getProjectId(),
+        "us-central1", () -> {
+          HttpsCallableContext context =
+              new HttpsCallableContext("token", null);
+          return Tasks.forResult(context);
+        }, NO_EMULATOR);
 
     HttpsCallableReference function = functions.getHttpsCallable("tokenTest");
     Task<HttpsCallableResult> result = function.call(new HashMap<>());
@@ -105,19 +103,17 @@ public class CallTest {
 
   @Test
   public void testInstanceId() throws InterruptedException, ExecutionException {
-    // Override the normal token provider to simulate FirebaseAuth being logged in.
-    FirebaseFunctions functions =
-        new FirebaseFunctions(
-            app.getApplicationContext(),
-            app.getOptions().getProjectId(),
-            "us-central1",
-            () -> {
-              HttpsCallableContext context = new HttpsCallableContext(null, "iid");
-              return Tasks.forResult(context);
-            },
-            NO_EMULATOR);
+    // Override the normal token provider to simulate FirebaseAuth being logged
+    // in.
+    FirebaseFunctions functions = new FirebaseFunctions(
+        app.getApplicationContext(), app.getOptions().getProjectId(),
+        "us-central1", () -> {
+          HttpsCallableContext context = new HttpsCallableContext(null, "iid");
+          return Tasks.forResult(context);
+        }, NO_EMULATOR);
 
-    HttpsCallableReference function = functions.getHttpsCallable("instanceIdTest");
+    HttpsCallableReference function =
+        functions.getHttpsCallable("instanceIdTest");
     Task<HttpsCallableResult> result = function.call(new HashMap<>());
     Object actual = Tasks.await(result).getData();
 
@@ -143,12 +139,14 @@ public class CallTest {
   public void testMissingResult() {
     FirebaseFunctions functions = FirebaseFunctions.getInstance(app);
 
-    HttpsCallableReference function = functions.getHttpsCallable("missingResultTest");
+    HttpsCallableReference function =
+        functions.getHttpsCallable("missingResultTest");
     Task<HttpsCallableResult> result = function.call(null);
-    ExecutionException exe = assertThrows(ExecutionException.class, () -> Tasks.await(result));
+    ExecutionException exe =
+        assertThrows(ExecutionException.class, () -> Tasks.await(result));
     Throwable cause = exe.getCause();
     assertTrue(cause.toString(), cause instanceof FirebaseFunctionsException);
-    FirebaseFunctionsException ffe = (FirebaseFunctionsException) cause;
+    FirebaseFunctionsException ffe = (FirebaseFunctionsException)cause;
     assertEquals(Code.INTERNAL, ffe.getCode());
     assertEquals("Response is missing data field.", ffe.getMessage());
     assertNull(ffe.getDetails());
@@ -158,12 +156,14 @@ public class CallTest {
   public void testUnhandledError() {
     FirebaseFunctions functions = FirebaseFunctions.getInstance(app);
 
-    HttpsCallableReference function = functions.getHttpsCallable("unhandledErrorTest");
+    HttpsCallableReference function =
+        functions.getHttpsCallable("unhandledErrorTest");
     Task<HttpsCallableResult> result = function.call();
-    ExecutionException exe = assertThrows(ExecutionException.class, () -> Tasks.await(result));
+    ExecutionException exe =
+        assertThrows(ExecutionException.class, () -> Tasks.await(result));
     Throwable cause = exe.getCause();
     assertTrue(cause.toString(), cause instanceof FirebaseFunctionsException);
-    FirebaseFunctionsException ffe = (FirebaseFunctionsException) cause;
+    FirebaseFunctionsException ffe = (FirebaseFunctionsException)cause;
     assertEquals(Code.INTERNAL, ffe.getCode());
     assertEquals("INTERNAL", ffe.getMessage());
     assertNull(ffe.getDetails());
@@ -173,12 +173,14 @@ public class CallTest {
   public void testUnknownError() {
     FirebaseFunctions functions = FirebaseFunctions.getInstance(app);
 
-    HttpsCallableReference function = functions.getHttpsCallable("unknownErrorTest");
+    HttpsCallableReference function =
+        functions.getHttpsCallable("unknownErrorTest");
     Task<HttpsCallableResult> result = function.call();
-    ExecutionException exe = assertThrows(ExecutionException.class, () -> Tasks.await(result));
+    ExecutionException exe =
+        assertThrows(ExecutionException.class, () -> Tasks.await(result));
     Throwable cause = exe.getCause();
     assertTrue(cause.toString(), cause instanceof FirebaseFunctionsException);
-    FirebaseFunctionsException ffe = (FirebaseFunctionsException) cause;
+    FirebaseFunctionsException ffe = (FirebaseFunctionsException)cause;
     assertEquals(Code.INTERNAL, ffe.getCode());
     assertEquals("INTERNAL", ffe.getMessage());
     assertNull(ffe.getDetails());
@@ -188,17 +190,20 @@ public class CallTest {
   public void testExplicitError() {
     FirebaseFunctions functions = FirebaseFunctions.getInstance(app);
 
-    HttpsCallableReference function = functions.getHttpsCallable("explicitErrorTest");
+    HttpsCallableReference function =
+        functions.getHttpsCallable("explicitErrorTest");
     Task<HttpsCallableResult> result = function.call();
-    ExecutionException exe = assertThrows(ExecutionException.class, () -> Tasks.await(result));
+    ExecutionException exe =
+        assertThrows(ExecutionException.class, () -> Tasks.await(result));
     Throwable cause = exe.getCause();
     assertTrue(cause.toString(), cause instanceof FirebaseFunctionsException);
-    FirebaseFunctionsException ffe = (FirebaseFunctionsException) cause;
+    FirebaseFunctionsException ffe = (FirebaseFunctionsException)cause;
     assertEquals(Code.OUT_OF_RANGE, ffe.getCode());
     assertEquals("explicit nope", ffe.getMessage());
     assertNotNull(ffe.getDetails());
-    assertTrue(ffe.getDetails().getClass().getCanonicalName(), ffe.getDetails() instanceof Map);
-    Map<?, ?> details = (Map<?, ?>) ffe.getDetails();
+    assertTrue(ffe.getDetails().getClass().getCanonicalName(),
+               ffe.getDetails() instanceof Map);
+    Map<?, ?> details = (Map<?, ?>)ffe.getDetails();
     assertEquals(10, details.get("start"));
     assertEquals(20, details.get("end"));
     assertEquals(30L, details.get("long"));
@@ -208,12 +213,14 @@ public class CallTest {
   public void testHttpError() {
     FirebaseFunctions functions = FirebaseFunctions.getInstance(app);
 
-    HttpsCallableReference function = functions.getHttpsCallable("httpErrorTest");
+    HttpsCallableReference function =
+        functions.getHttpsCallable("httpErrorTest");
     Task<HttpsCallableResult> result = function.call();
-    ExecutionException exe = assertThrows(ExecutionException.class, () -> Tasks.await(result));
+    ExecutionException exe =
+        assertThrows(ExecutionException.class, () -> Tasks.await(result));
     Throwable cause = exe.getCause();
     assertTrue(cause.toString(), cause instanceof FirebaseFunctionsException);
-    FirebaseFunctionsException ffe = (FirebaseFunctionsException) cause;
+    FirebaseFunctionsException ffe = (FirebaseFunctionsException)cause;
     assertEquals(Code.INVALID_ARGUMENT, ffe.getCode());
     assertEquals("INVALID_ARGUMENT", ffe.getMessage());
     assertNull(ffe.getDetails());
@@ -224,13 +231,15 @@ public class CallTest {
     FirebaseFunctions functions = FirebaseFunctions.getInstance(app);
 
     HttpsCallableReference function =
-        functions.getHttpsCallable("timeoutTest").withTimeout(10, TimeUnit.MILLISECONDS);
+        functions.getHttpsCallable("timeoutTest")
+            .withTimeout(10, TimeUnit.MILLISECONDS);
     assertEquals(10, function.getTimeout());
     Task<HttpsCallableResult> result = function.call();
-    ExecutionException exe = assertThrows(ExecutionException.class, () -> Tasks.await(result));
+    ExecutionException exe =
+        assertThrows(ExecutionException.class, () -> Tasks.await(result));
     Throwable cause = exe.getCause();
     assertTrue(cause.toString(), cause instanceof FirebaseFunctionsException);
-    FirebaseFunctionsException ffe = (FirebaseFunctionsException) cause;
+    FirebaseFunctionsException ffe = (FirebaseFunctionsException)cause;
     assertEquals(Code.DEADLINE_EXCEEDED, ffe.getCode());
     assertEquals("DEADLINE_EXCEEDED", ffe.getMessage());
     assertNull(ffe.getDetails());

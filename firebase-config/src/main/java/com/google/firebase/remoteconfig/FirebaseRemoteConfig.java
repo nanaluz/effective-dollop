@@ -49,10 +49,11 @@ import org.json.JSONObject;
 /**
  * Entry point for the Firebase Remote Config (FRC) API.
  *
- * <p>Callers should first get the singleton object using {@link #getInstance()}, and then call
- * operations on that singleton object. The singleton contains the complete set of FRC parameter
- * values available to your app. The singleton also stores values fetched from the FRC Server until
- * they are made available for use with a call to {@link #activate()}.
+ * <p>Callers should first get the singleton object using {@link
+ * #getInstance()}, and then call operations on that singleton object. The
+ * singleton contains the complete set of FRC parameter values available to your
+ * app. The singleton also stores values fetched from the FRC Server until they
+ * are made available for use with a call to {@link #activate()}.
  *
  * @author Miraziz Yusupov
  */
@@ -63,25 +64,30 @@ public class FirebaseRemoteConfig {
   /**
    * Returns a singleton instance of Firebase Remote Config.
    *
-   * <p>{@link FirebaseRemoteConfig} uses the default {@link FirebaseApp}, so if no {@link
-   * FirebaseApp} has been initialized yet, this method throws an {@link IllegalStateException}.
+   * <p>{@link FirebaseRemoteConfig} uses the default {@link FirebaseApp}, so if
+   * no {@link FirebaseApp} has been initialized yet, this method throws an
+   * {@link IllegalStateException}.
    *
-   * <p>Note: Also initializes the Firebase installations SDK that creates installation IDs to
-   * identify Firebase installations and periodically sends data to Firebase servers. Remote Config
-   * requires installation IDs for Fetch requests. To stop the periodic sync, call {@link
-   * com.google.firebase.installations.FirebaseInstallations#delete()}. Sending a Fetch request
-   * after deletion will create a new installation ID for this Firebase installation and resume the
-   * periodic sync.
+   * <p>Note: Also initializes the Firebase installations SDK that creates
+   * installation IDs to identify Firebase installations and periodically sends
+   * data to Firebase servers. Remote Config requires installation IDs for Fetch
+   * requests. To stop the periodic sync, call {@link
+   * com.google.firebase.installations.FirebaseInstallations#delete()}. Sending
+   * a Fetch request after deletion will create a new installation ID for this
+   * Firebase installation and resume the periodic sync.
    *
-   * @return A singleton instance of {@link FirebaseRemoteConfig} for the default {@link
-   *     FirebaseApp}.
+   * @return A singleton instance of {@link FirebaseRemoteConfig} for the
+   *     default {@link FirebaseApp}.
    */
   @NonNull
   public static FirebaseRemoteConfig getInstance() {
     return getInstance(FirebaseApp.getInstance());
   }
 
-  /** Returns an instance of Firebase Remote Config for the given {@link FirebaseApp}. */
+  /**
+   * Returns an instance of Firebase Remote Config for the given {@link
+   * FirebaseApp}.
+   */
   @NonNull
   public static FirebaseRemoteConfig getInstance(@NonNull FirebaseApp app) {
     return app.get(RemoteConfigComponent.class).getDefault();
@@ -103,29 +109,35 @@ public class FirebaseRemoteConfig {
 
   /** Indicates that the value returned is the static default value. */
   public static final int VALUE_SOURCE_STATIC = 0;
-  /** Indicates that the value returned was retrieved from the defaults set by the client. */
+  /**
+   * Indicates that the value returned was retrieved from the defaults set by
+   * the client.
+   */
   public static final int VALUE_SOURCE_DEFAULT = 1;
-  /** Indicates that the value returned was retrieved from the Firebase Remote Config Server. */
+  /**
+   * Indicates that the value returned was retrieved from the Firebase Remote
+   * Config Server.
+   */
   public static final int VALUE_SOURCE_REMOTE = 2;
 
   /**
-   * Indicates that the most recent fetch of parameter values from the Firebase Remote Config Server
-   * was completed successfully.
+   * Indicates that the most recent fetch of parameter values from the Firebase
+   * Remote Config Server was completed successfully.
    */
   public static final int LAST_FETCH_STATUS_SUCCESS = -1;
   /**
-   * Indicates that the FirebaseRemoteConfig singleton object has not yet attempted to fetch
-   * parameter values from the Firebase Remote Config Server.
+   * Indicates that the FirebaseRemoteConfig singleton object has not yet
+   * attempted to fetch parameter values from the Firebase Remote Config Server.
    */
   public static final int LAST_FETCH_STATUS_NO_FETCH_YET = 0;
   /**
-   * Indicates that the most recent attempt to fetch parameter values from the Firebase Remote
-   * Config Server has failed.
+   * Indicates that the most recent attempt to fetch parameter values from the
+   * Firebase Remote Config Server has failed.
    */
   public static final int LAST_FETCH_STATUS_FAILURE = 1;
   /**
-   * Indicates that the most recent attempt to fetch parameter values from the Firebase Remote
-   * Config Server was throttled.
+   * Indicates that the most recent attempt to fetch parameter values from the
+   * Firebase Remote Config Server was throttled.
    */
   public static final int LAST_FETCH_STATUS_THROTTLED = 2;
 
@@ -139,8 +151,9 @@ public class FirebaseRemoteConfig {
   private final Context context;
   private final FirebaseApp firebaseApp;
   /**
-   * Firebase A/B Testing (ABT) is only valid for the 3P namespace, so the ABT variable will be null
-   * if the current instance of Firebase Remote Config is using a non-3P namespace.
+   * Firebase A/B Testing (ABT) is only valid for the 3P namespace, so the ABT
+   * variable will be null if the current instance of Firebase Remote Config is
+   * using a non-3P namespace.
    */
   @Nullable private final FirebaseABTesting firebaseAbt;
 
@@ -158,18 +171,15 @@ public class FirebaseRemoteConfig {
    *
    * @hide
    */
-  FirebaseRemoteConfig(
-      Context context,
-      FirebaseApp firebaseApp,
-      FirebaseInstallationsApi firebaseInstallations,
-      @Nullable FirebaseABTesting firebaseAbt,
-      Executor executor,
-      ConfigCacheClient fetchedConfigsCache,
-      ConfigCacheClient activatedConfigsCache,
-      ConfigCacheClient defaultConfigsCache,
-      ConfigFetchHandler fetchHandler,
-      ConfigGetParameterHandler getHandler,
-      ConfigMetadataClient frcMetadata) {
+  FirebaseRemoteConfig(Context context, FirebaseApp firebaseApp,
+                       FirebaseInstallationsApi firebaseInstallations,
+                       @Nullable FirebaseABTesting firebaseAbt,
+                       Executor executor, ConfigCacheClient fetchedConfigsCache,
+                       ConfigCacheClient activatedConfigsCache,
+                       ConfigCacheClient defaultConfigsCache,
+                       ConfigFetchHandler fetchHandler,
+                       ConfigGetParameterHandler getHandler,
+                       ConfigMetadataClient frcMetadata) {
     this.context = context;
     this.firebaseApp = firebaseApp;
     this.firebaseInstallations = firebaseInstallations;
@@ -184,40 +194,42 @@ public class FirebaseRemoteConfig {
   }
 
   /**
-   * Returns a {@link Task} representing the initialization status of this Firebase Remote Config
-   * instance.
+   * Returns a {@link Task} representing the initialization status of this
+   * Firebase Remote Config instance.
    */
   @NonNull
   public Task<FirebaseRemoteConfigInfo> ensureInitialized() {
     Task<ConfigContainer> activatedConfigsTask = activatedConfigsCache.get();
     Task<ConfigContainer> defaultsConfigsTask = defaultConfigsCache.get();
     Task<ConfigContainer> fetchedConfigsTask = fetchedConfigsCache.get();
-    Task<FirebaseRemoteConfigInfo> metadataTask = Tasks.call(executor, this::getInfo);
+    Task<FirebaseRemoteConfigInfo> metadataTask =
+        Tasks.call(executor, this::getInfo);
     Task<String> installationIdTask = firebaseInstallations.getId();
-    Task<InstallationTokenResult> installationTokenTask = firebaseInstallations.getToken(false);
+    Task<InstallationTokenResult> installationTokenTask =
+        firebaseInstallations.getToken(false);
 
-    return Tasks.whenAllComplete(
-            activatedConfigsTask,
-            defaultsConfigsTask,
-            fetchedConfigsTask,
-            metadataTask,
-            installationIdTask,
-            installationTokenTask)
-        .continueWith(executor, (unusedListOfCompletedTasks) -> metadataTask.getResult());
+    return Tasks
+        .whenAllComplete(activatedConfigsTask, defaultsConfigsTask,
+                         fetchedConfigsTask, metadataTask, installationIdTask,
+                         installationTokenTask)
+        .continueWith(executor,
+                      (unusedListOfCompletedTasks) -> metadataTask.getResult());
   }
 
   /**
    * Asynchronously fetches and then activates the fetched configs.
    *
-   * <p>If the time elapsed since the last fetch from the Firebase Remote Config backend is more
-   * than the default minimum fetch interval, configs are fetched from the backend.
+   * <p>If the time elapsed since the last fetch from the Firebase Remote Config
+   * backend is more than the default minimum fetch interval, configs are
+   * fetched from the backend.
    *
-   * <p>After the fetch is complete, the configs are activated so that the fetched key value pairs
-   * take effect.
+   * <p>After the fetch is complete, the configs are activated so that the
+   * fetched key value pairs take effect.
    *
-   * @return {@link Task} with a {@code true} result if the current call activated the fetched
-   *     configs; if no configs were fetched from the backend and the local fetched configs have
-   *     already been activated, returns a {@link Task} with a {@code false} result.
+   * @return {@link Task} with a {@code true} result if the current call
+   *     activated the fetched configs; if no configs were fetched from the
+   *     backend and the local fetched configs have already been activated,
+   *     returns a {@link Task} with a {@code false} result.
    */
   @NonNull
   public Task<Boolean> fetchAndActivate() {
@@ -225,46 +237,50 @@ public class FirebaseRemoteConfig {
   }
 
   /**
-   * Activates the most recently fetched configs, so that the fetched key value pairs take effect.
+   * Activates the most recently fetched configs, so that the fetched key value
+   * pairs take effect.
    *
-   * @return True if the current call activated the fetched configs; false if the fetched configs
-   *     were already activated by a previous call.
+   * @return True if the current call activated the fetched configs; false if
+   *     the fetched configs were already activated by a previous call.
    * @deprecated Use {@link #activate()} instead.
    */
   @Deprecated
   @WorkerThread
   public boolean activateFetched() {
-    @Nullable ConfigContainer fetchedContainer = fetchedConfigsCache.getBlocking();
+    @Nullable
+    ConfigContainer fetchedContainer = fetchedConfigsCache.getBlocking();
     if (fetchedContainer == null) {
       return false;
     }
 
-    // If the activated configs exist, verify that the fetched configs are fresher.
-    @Nullable ConfigContainer activatedContainer = activatedConfigsCache.getBlocking();
+    // If the activated configs exist, verify that the fetched configs are
+    // fresher.
+    @Nullable
+    ConfigContainer activatedContainer = activatedConfigsCache.getBlocking();
     if (!isFetchedFresh(fetchedContainer, activatedContainer)) {
       return false;
     }
 
-    // Write the newly activated configs to disk, and then clear the fetched configs from disk.
-    // Fire and forget call, so consistency between disk and memory is not guaranteed.
-    activatedConfigsCache
-        .putWithoutWaitingForDiskWrite(fetchedContainer)
-        .addOnSuccessListener(
-            executor,
-            newlyActivatedContainer -> {
-              fetchedConfigsCache.clear();
-              updateAbtWithActivatedExperiments(newlyActivatedContainer.getAbtExperiments());
-            });
+    // Write the newly activated configs to disk, and then clear the fetched
+    // configs from disk. Fire and forget call, so consistency between disk and
+    // memory is not guaranteed.
+    activatedConfigsCache.putWithoutWaitingForDiskWrite(fetchedContainer)
+        .addOnSuccessListener(executor, newlyActivatedContainer -> {
+          fetchedConfigsCache.clear();
+          updateAbtWithActivatedExperiments(
+              newlyActivatedContainer.getAbtExperiments());
+        });
     return true;
   }
 
   /**
-   * Asynchronously activates the most recently fetched configs, so that the fetched key value pairs
-   * take effect.
+   * Asynchronously activates the most recently fetched configs, so that the
+   * fetched key value pairs take effect.
    *
-   * @return {@link Task} with a {@code true} result if the current call activated the fetched
-   *     configs; if the fetched configs were already activated by a previous call, returns a {@link
-   *     Task} with a {@code false} result.
+   * @return {@link Task} with a {@code true} result if the current call
+   *     activated the fetched configs; if the fetched configs were already
+   *     activated by a previous call, returns a {@link Task} with a {@code
+   *     false} result.
    */
   @NonNull
   public Task<Boolean> activate() {
@@ -272,45 +288,49 @@ public class FirebaseRemoteConfig {
     Task<ConfigContainer> activatedConfigsTask = activatedConfigsCache.get();
 
     return Tasks.whenAllComplete(fetchedConfigsTask, activatedConfigsTask)
-        .continueWithTask(
-            executor,
-            (unusedListOfCompletedTasks) -> {
-              if (!fetchedConfigsTask.isSuccessful() || fetchedConfigsTask.getResult() == null) {
-                return Tasks.forResult(false);
-              }
-              ConfigContainer fetchedContainer = fetchedConfigsTask.getResult();
+        .continueWithTask(executor, (unusedListOfCompletedTasks) -> {
+          if (!fetchedConfigsTask.isSuccessful() ||
+              fetchedConfigsTask.getResult() == null) {
+            return Tasks.forResult(false);
+          }
+          ConfigContainer fetchedContainer = fetchedConfigsTask.getResult();
 
-              // If the activated configs exist, verify that the fetched configs are fresher.
-              if (activatedConfigsTask.isSuccessful()) {
-                @Nullable ConfigContainer activatedContainer = activatedConfigsTask.getResult();
-                if (!isFetchedFresh(fetchedContainer, activatedContainer)) {
-                  return Tasks.forResult(false);
-                }
-              }
+          // If the activated configs exist, verify that the fetched configs are
+          // fresher.
+          if (activatedConfigsTask.isSuccessful()) {
+            @Nullable
+            ConfigContainer activatedContainer =
+                activatedConfigsTask.getResult();
+            if (!isFetchedFresh(fetchedContainer, activatedContainer)) {
+              return Tasks.forResult(false);
+            }
+          }
 
-              return activatedConfigsCache
-                  .put(fetchedContainer)
-                  .continueWith(executor, this::processActivatePutTask);
-            });
+          return activatedConfigsCache.put(fetchedContainer)
+              .continueWith(executor, this::processActivatePutTask);
+        });
   }
 
   /**
    * Starts fetching configs, adhering to the default minimum fetch interval.
    *
-   * <p>The fetched configs only take effect after the next {@link #activate} call.
+   * <p>The fetched configs only take effect after the next {@link #activate}
+   * call.
    *
-   * <p>Depending on the time elapsed since the last fetch from the Firebase Remote Config backend,
-   * configs are either served from local storage, or fetched from the backend. The default minimum
-   * fetch interval can be set with {@code
-   * FirebaseRemoteConfigSettings.Builder#setMinimumFetchIntervalInSeconds(long)}; the static
-   * default is 12 hours.
+   * <p>Depending on the time elapsed since the last fetch from the Firebase
+   * Remote Config backend, configs are either served from local storage, or
+   * fetched from the backend. The default minimum fetch interval can be set
+   * with {@code
+   * FirebaseRemoteConfigSettings.Builder#setMinimumFetchIntervalInSeconds(long)};
+   * the static default is 12 hours.
    *
-   * <p>Note: Also initializes the Firebase installations SDK that creates installation IDs to
-   * identify Firebase installations and periodically sends data to Firebase servers. Remote Config
-   * requires installation IDs for Fetch requests. To stop the periodic sync, call {@link
-   * com.google.firebase.installations.FirebaseInstallations#delete()}. Sending a Fetch request
-   * after deletion will create a new installation ID for this Firebase installation and resume the
-   * periodic sync.
+   * <p>Note: Also initializes the Firebase installations SDK that creates
+   * installation IDs to identify Firebase installations and periodically sends
+   * data to Firebase servers. Remote Config requires installation IDs for Fetch
+   * requests. To stop the periodic sync, call {@link
+   * com.google.firebase.installations.FirebaseInstallations#delete()}. Sending
+   * a Fetch request after deletion will create a new installation ID for this
+   * Firebase installation and resume the periodic sync.
    *
    * @return {@link Task} representing the {@code fetch} call.
    */
@@ -319,34 +339,41 @@ public class FirebaseRemoteConfig {
     Task<FetchResponse> fetchTask = fetchHandler.fetch();
 
     // Convert Task type to Void.
-    return fetchTask.onSuccessTask((unusedFetchResponse) -> Tasks.forResult(null));
+    return fetchTask.onSuccessTask(
+        (unusedFetchResponse) -> Tasks.forResult(null));
   }
 
   /**
    * Starts fetching configs, adhering to the specified minimum fetch interval.
    *
-   * <p>The fetched configs only take effect after the next {@link #activate()} call.
+   * <p>The fetched configs only take effect after the next {@link #activate()}
+   * call.
    *
-   * <p>Depending on the time elapsed since the last fetch from the Firebase Remote Config backend,
-   * configs are either served from local storage, or fetched from the backend.
+   * <p>Depending on the time elapsed since the last fetch from the Firebase
+   * Remote Config backend, configs are either served from local storage, or
+   * fetched from the backend.
    *
-   * <p>Note: Also initializes the Firebase installations SDK that creates installation IDs to
-   * identify Firebase installations and periodically sends data to Firebase servers. Remote Config
-   * requires installation IDs for Fetch requests. To stop the periodic sync, call {@link
-   * com.google.firebase.installations.FirebaseInstallations#delete()}. Sending a Fetch request
-   * after deletion will create a new installation ID for this Firebase installation and resume the
-   * periodic sync.
+   * <p>Note: Also initializes the Firebase installations SDK that creates
+   * installation IDs to identify Firebase installations and periodically sends
+   * data to Firebase servers. Remote Config requires installation IDs for Fetch
+   * requests. To stop the periodic sync, call {@link
+   * com.google.firebase.installations.FirebaseInstallations#delete()}. Sending
+   * a Fetch request after deletion will create a new installation ID for this
+   * Firebase installation and resume the periodic sync.
    *
-   * @param minimumFetchIntervalInSeconds If configs in the local storage were fetched more than
-   *     this many seconds ago, configs are served from the backend instead of local storage.
+   * @param minimumFetchIntervalInSeconds If configs in the local storage were
+   *     fetched more than this many seconds ago, configs are served from the
+   *     backend instead of local storage.
    * @return {@link Task} representing the {@code fetch} call.
    */
   @NonNull
   public Task<Void> fetch(long minimumFetchIntervalInSeconds) {
-    Task<FetchResponse> fetchTask = fetchHandler.fetch(minimumFetchIntervalInSeconds);
+    Task<FetchResponse> fetchTask =
+        fetchHandler.fetch(minimumFetchIntervalInSeconds);
 
     // Convert Task type to Void.
-    return fetchTask.onSuccessTask((unusedFetchResponse) -> Tasks.forResult(null));
+    return fetchTask.onSuccessTask(
+        (unusedFetchResponse) -> Tasks.forResult(null));
   }
 
   /**
@@ -355,14 +382,14 @@ public class FirebaseRemoteConfig {
    * <p>Evaluates the value of the parameter in the following order:
    *
    * <ol>
-   *   <li>The activated value, if the last successful {@link #activate()} contained the key.
-   *   <li>The default value, if the key was set with {@link #setDefaultsAsync}.
-   *   <li>{@link #DEFAULT_VALUE_FOR_STRING}.
+   *   <li>The activated value, if the last successful {@link #activate()}
+   * contained the key. <li>The default value, if the key was set with {@link
+   * #setDefaultsAsync}. <li>{@link #DEFAULT_VALUE_FOR_STRING}.
    * </ol>
    *
    * @param key A Firebase Remote Config parameter key.
-   * @return {@link String} representing the value of the Firebase Remote Config parameter with the
-   *     given key.
+   * @return {@link String} representing the value of the Firebase Remote Config
+   *     parameter with the given key.
    */
   @NonNull
   public String getString(@NonNull String key) {
@@ -375,20 +402,22 @@ public class FirebaseRemoteConfig {
    * <p>Evaluates the value of the parameter in the following order:
    *
    * <ol>
-   *   <li>The activated value, if the last successful {@link #activate()} contained the key, and
-   *       the value can be converted into a {@code boolean}.
-   *   <li>The default value, if the key was set with {@link #setDefaultsAsync}, and the value can
-   *       be converted into a {@code boolean}.
-   *   <li>{@link #DEFAULT_VALUE_FOR_BOOLEAN}.
+   *   <li>The activated value, if the last successful {@link #activate()}
+   * contained the key, and the value can be converted into a {@code boolean}.
+   *   <li>The default value, if the key was set with {@link #setDefaultsAsync},
+   * and the value can be converted into a {@code boolean}. <li>{@link
+   * #DEFAULT_VALUE_FOR_BOOLEAN}.
    * </ol>
    *
-   * <p>"1", "true", "t", "yes", "y", and "on" are strings that are interpreted (case insensitive)
-   * as {@code true}, and "0", "false", "f", "no", "n", "off", and empty string are interpreted
-   * (case insensitive) as {@code false}.
+   * <p>"1", "true", "t", "yes", "y", and "on" are strings that are interpreted
+   * (case insensitive) as {@code true}, and "0", "false", "f", "no", "n",
+   * "off", and empty string are interpreted (case insensitive) as {@code
+   * false}.
    *
-   * @param key A Firebase Remote Config parameter key with a {@code boolean} parameter value.
-   * @return {@code boolean} representing the value of the Firebase Remote Config parameter with the
-   *     given key.
+   * @param key A Firebase Remote Config parameter key with a {@code boolean}
+   *     parameter value.
+   * @return {@code boolean} representing the value of the Firebase Remote
+   *     Config parameter with the given key.
    */
   public boolean getBoolean(@NonNull String key) {
     return getHandler.getBoolean(key);
@@ -400,14 +429,14 @@ public class FirebaseRemoteConfig {
    * <p>Evaluates the value of the parameter in the following order:
    *
    * <ol>
-   *   <li>The activated value, if the last successful {@link #activate()} contained the key.
-   *   <li>The default value, if the key was set with {@link #setDefaultsAsync}.
-   *   <li>{@link #DEFAULT_VALUE_FOR_BYTE_ARRAY}.
+   *   <li>The activated value, if the last successful {@link #activate()}
+   * contained the key. <li>The default value, if the key was set with {@link
+   * #setDefaultsAsync}. <li>{@link #DEFAULT_VALUE_FOR_BYTE_ARRAY}.
    * </ol>
    *
    * @param key A Firebase Remote Config parameter key.
-   * @return {@code byte[]} representing the value of the Firebase Remote Config parameter with the
-   *     given key.
+   * @return {@code byte[]} representing the value of the Firebase Remote Config
+   *     parameter with the given key.
    * @deprecated please use {@link #getString(String)} instead
    */
   @NonNull
@@ -422,16 +451,17 @@ public class FirebaseRemoteConfig {
    * <p>Evaluates the value of the parameter in the following order:
    *
    * <ol>
-   *   <li>The activated value, if the last successful {@link #activate()} contained the key, and
-   *       the value can be converted into a {@code double}.
-   *   <li>The default value, if the key was set with {@link #setDefaultsAsync}, and the value can
-   *       be converted into a {@code double}.
-   *   <li>{@link #DEFAULT_VALUE_FOR_DOUBLE}.
+   *   <li>The activated value, if the last successful {@link #activate()}
+   * contained the key, and the value can be converted into a {@code double}.
+   *   <li>The default value, if the key was set with {@link #setDefaultsAsync},
+   * and the value can be converted into a {@code double}. <li>{@link
+   * #DEFAULT_VALUE_FOR_DOUBLE}.
    * </ol>
    *
-   * @param key A Firebase Remote Config parameter key with a {@code double} parameter value.
-   * @return {@code double} representing the value of the Firebase Remote Config parameter with the
-   *     given key.
+   * @param key A Firebase Remote Config parameter key with a {@code double}
+   *     parameter value.
+   * @return {@code double} representing the value of the Firebase Remote Config
+   *     parameter with the given key.
    */
   public double getDouble(@NonNull String key) {
     return getHandler.getDouble(key);
@@ -443,35 +473,36 @@ public class FirebaseRemoteConfig {
    * <p>Evaluates the value of the parameter in the following order:
    *
    * <ol>
-   *   <li>The activated value, if the last successful {@link #activate()} contained the key, and
-   *       the value can be converted into a {@code long}.
-   *   <li>The default value, if the key was set with {@link #setDefaultsAsync}, and the value can
-   *       be converted into a {@code long}.
-   *   <li>{@link #DEFAULT_VALUE_FOR_LONG}.
+   *   <li>The activated value, if the last successful {@link #activate()}
+   * contained the key, and the value can be converted into a {@code long}.
+   *   <li>The default value, if the key was set with {@link #setDefaultsAsync},
+   * and the value can be converted into a {@code long}. <li>{@link
+   * #DEFAULT_VALUE_FOR_LONG}.
    * </ol>
    *
-   * @param key A Firebase Remote Config parameter key with a {@code long} parameter value.
-   * @return {@code long} representing the value of the Firebase Remote Config parameter with the
-   *     given key.
+   * @param key A Firebase Remote Config parameter key with a {@code long}
+   *     parameter value.
+   * @return {@code long} representing the value of the Firebase Remote Config
+   *     parameter with the given key.
    */
-  public long getLong(@NonNull String key) {
-    return getHandler.getLong(key);
-  }
+  public long getLong(@NonNull String key) { return getHandler.getLong(key); }
 
   /**
-   * Returns the parameter value for the given key as a {@link FirebaseRemoteConfigValue}.
+   * Returns the parameter value for the given key as a {@link
+   * FirebaseRemoteConfigValue}.
    *
    * <p>Evaluates the value of the parameter in the following order:
    *
    * <ol>
-   *   <li>The activated value, if the last successful {@link #activate()} contained the key.
-   *   <li>The default value, if the key was set with {@link #setDefaultsAsync}.
-   *   <li>A {@link FirebaseRemoteConfigValue} that returns the static value for each type.
+   *   <li>The activated value, if the last successful {@link #activate()}
+   * contained the key. <li>The default value, if the key was set with {@link
+   * #setDefaultsAsync}. <li>A {@link FirebaseRemoteConfigValue} that returns
+   * the static value for each type.
    * </ol>
    *
    * @param key A Firebase Remote Config parameter key.
-   * @return {@link FirebaseRemoteConfigValue} representing the value of the Firebase Remote Config
-   *     parameter with the given key.
+   * @return {@link FirebaseRemoteConfigValue} representing the value of the
+   *     Firebase Remote Config parameter with the given key.
    */
   @NonNull
   public FirebaseRemoteConfigValue getValue(@NonNull String key) {
@@ -479,10 +510,13 @@ public class FirebaseRemoteConfig {
   }
 
   /**
-   * Returns a {@link Set} of all Firebase Remote Config parameter keys with the given prefix.
+   * Returns a {@link Set} of all Firebase Remote Config parameter keys with the
+   * given prefix.
    *
-   * @param prefix The key prefix to look for. If the prefix is empty, all keys are returned.
-   * @return {@link Set} of Remote Config parameter keys that start with the specified prefix.
+   * @param prefix The key prefix to look for. If the prefix is empty, all keys
+   *     are returned.
+   * @return {@link Set} of Remote Config parameter keys that start with the
+   *     specified prefix.
    */
   @NonNull
   public Set<String> getKeysByPrefix(@NonNull String prefix) {
@@ -495,8 +529,9 @@ public class FirebaseRemoteConfig {
    * <p>Evaluates the values of the parameters in the following order:
    *
    * <ol>
-   *   <li>The activated value, if the last successful {@link #activate()} contained the key.
-   *   <li>The default value, if the key was set with {@link #setDefaultsAsync}.
+   *   <li>The activated value, if the last successful {@link #activate()}
+   * contained the key. <li>The default value, if the key was set with {@link
+   * #setDefaultsAsync}.
    * </ol>
    */
   @NonNull
@@ -517,28 +552,30 @@ public class FirebaseRemoteConfig {
    * Changes the settings for this {@link FirebaseRemoteConfig} instance.
    *
    * @param settings The new settings to be applied.
-   * @deprecated Use {@link #setConfigSettingsAsync(FirebaseRemoteConfigSettings)} instead.
+   * @deprecated Use {@link
+   *     #setConfigSettingsAsync(FirebaseRemoteConfigSettings)} instead.
    */
   @Deprecated
-  public void setConfigSettings(@NonNull FirebaseRemoteConfigSettings settings) {
+  public void
+  setConfigSettings(@NonNull FirebaseRemoteConfigSettings settings) {
     frcMetadata.setConfigSettingsWithoutWaitingOnDiskWrite(settings);
   }
 
   /**
-   * Asynchronously changes the settings for this {@link FirebaseRemoteConfig} instance.
+   * Asynchronously changes the settings for this {@link FirebaseRemoteConfig}
+   * instance.
    *
    * @param settings The new settings to be applied.
    */
   @NonNull
-  public Task<Void> setConfigSettingsAsync(@NonNull FirebaseRemoteConfigSettings settings) {
-    return Tasks.call(
-        executor,
-        () -> {
-          frcMetadata.setConfigSettings(settings);
+  public Task<Void>
+  setConfigSettingsAsync(@NonNull FirebaseRemoteConfigSettings settings) {
+    return Tasks.call(executor, () -> {
+      frcMetadata.setConfigSettings(settings);
 
-          // Return value required; return null for Void.
-          return null;
-        });
+      // Return value required; return null for Void.
+      return null;
+    });
   }
 
   /**
@@ -554,18 +591,20 @@ public class FirebaseRemoteConfig {
    *   <li><code>Boolean</code>
    * </ul>
    *
-   * @param defaults Map of key value pairs representing Firebase Remote Config parameter keys and
-   *     values.
+   * @param defaults Map of key value pairs representing Firebase Remote Config
+   *     parameter keys and values.
    * @deprecated Use {@link #setDefaultsAsync} instead.
    */
   @Deprecated
   public void setDefaults(@NonNull Map<String, Object> defaults) {
-    // Fetch values from the server are in the Map<String, String> format, so match that here.
+    // Fetch values from the server are in the Map<String, String> format, so
+    // match that here.
     Map<String, String> defaultsStringMap = new HashMap<>();
     for (Map.Entry<String, Object> defaultsEntry : defaults.entrySet()) {
       Object value = defaultsEntry.getValue();
       if (value instanceof byte[]) {
-        defaultsStringMap.put(defaultsEntry.getKey(), new String((byte[]) value));
+        defaultsStringMap.put(defaultsEntry.getKey(),
+                              new String((byte[])value));
       } else {
         defaultsStringMap.put(defaultsEntry.getKey(), value.toString());
       }
@@ -587,17 +626,19 @@ public class FirebaseRemoteConfig {
    *   <li><code>String</code>
    * </ul>
    *
-   * @param defaults {@link Map} of key value pairs representing Firebase Remote Config parameter
-   *     keys and values.
+   * @param defaults {@link Map} of key value pairs representing Firebase Remote
+   *     Config parameter keys and values.
    */
   @NonNull
   public Task<Void> setDefaultsAsync(@NonNull Map<String, Object> defaults) {
-    // Fetch values from the server are in the Map<String, String> format, so match that here.
+    // Fetch values from the server are in the Map<String, String> format, so
+    // match that here.
     Map<String, String> defaultsStringMap = new HashMap<>();
     for (Map.Entry<String, Object> defaultsEntry : defaults.entrySet()) {
       Object value = defaultsEntry.getValue();
       if (value instanceof byte[]) {
-        defaultsStringMap.put(defaultsEntry.getKey(), new String((byte[]) value));
+        defaultsStringMap.put(defaultsEntry.getKey(),
+                              new String((byte[])value));
       } else {
         defaultsStringMap.put(defaultsEntry.getKey(), value.toString());
       }
@@ -609,51 +650,52 @@ public class FirebaseRemoteConfig {
   /**
    * Sets default configs using an XML resource.
    *
-   * @param resourceId Id for the XML resource, which should be in your application's {@code
-   *     res/xml} folder.
+   * @param resourceId Id for the XML resource, which should be in your
+   *     application's {@code res/xml} folder.
    * @deprecated Use {@link #setDefaultsAsync} instead.
    */
   @Deprecated
   public void setDefaults(@XmlRes int resourceId) {
-    Map<String, String> xmlDefaults = DefaultsXmlParser.getDefaultsFromXml(context, resourceId);
+    Map<String, String> xmlDefaults =
+        DefaultsXmlParser.getDefaultsFromXml(context, resourceId);
     setDefaultsWithStringsMap(xmlDefaults);
   }
 
   /**
    * Sets default configs using an XML resource.
    *
-   * @param resourceId Id for the XML resource, which should be in your application's {@code
-   *     res/xml} folder.
+   * @param resourceId Id for the XML resource, which should be in your
+   *     application's {@code res/xml} folder.
    */
   @NonNull
   public Task<Void> setDefaultsAsync(@XmlRes int resourceId) {
-    Map<String, String> xmlDefaults = DefaultsXmlParser.getDefaultsFromXml(context, resourceId);
+    Map<String, String> xmlDefaults =
+        DefaultsXmlParser.getDefaultsFromXml(context, resourceId);
     return setDefaultsWithStringsMapAsync(xmlDefaults);
   }
 
   /**
-   * Deletes all activated, fetched and defaults configs and resets all Firebase Remote Config
-   * settings.
+   * Deletes all activated, fetched and defaults configs and resets all Firebase
+   * Remote Config settings.
    *
    * @return {@link Task} representing the {@code clear} call.
    */
   @NonNull
   public Task<Void> reset() {
-    // Use a Task to avoid throwing potential file I/O errors to the caller and because
-    // frcMetadata's clear call is blocking.
-    return Tasks.call(
-        executor,
-        () -> {
-          activatedConfigsCache.clear();
-          fetchedConfigsCache.clear();
-          defaultConfigsCache.clear();
-          frcMetadata.clear();
-          return null;
-        });
+    // Use a Task to avoid throwing potential file I/O errors to the caller and
+    // because frcMetadata's clear call is blocking.
+    return Tasks.call(executor, () -> {
+      activatedConfigsCache.clear();
+      fetchedConfigsCache.clear();
+      defaultConfigsCache.clear();
+      frcMetadata.clear();
+      return null;
+    });
   }
 
   /**
-   * Loads all the configs from disk by calling {@link ConfigCacheClient#get} on each cache client.
+   * Loads all the configs from disk by calling {@link ConfigCacheClient#get} on
+   * each cache client.
    *
    * @hide
    */
@@ -664,22 +706,26 @@ public class FirebaseRemoteConfig {
   }
 
   /**
-   * Processes the result of the put task that persists activated configs. If the task is
-   * successful, clears the fetched cache and updates the ABT SDK with the current experiments.
+   * Processes the result of the put task that persists activated configs. If
+   * the task is successful, clears the fetched cache and updates the ABT SDK
+   * with the current experiments.
    *
-   * @param putTask the {@link Task} returned by a {@link ConfigCacheClient#put(ConfigContainer)}
-   *     call on {@link #activatedConfigsCache}.
+   * @param putTask the {@link Task} returned by a {@link
+   *     ConfigCacheClient#put(ConfigContainer)} call on {@link
+   *     #activatedConfigsCache}.
    * @return True if {@code putTask} was successful, false otherwise.
    */
   private boolean processActivatePutTask(Task<ConfigContainer> putTask) {
     if (putTask.isSuccessful()) {
       fetchedConfigsCache.clear();
 
-      // An activate call should only be made if there are fetched values to activate, which are
-      // then put into the activated cache. So, if the put is called and succeeds, then the returned
-      // values from the put task must be non-null.
+      // An activate call should only be made if there are fetched values to
+      // activate, which are then put into the activated cache. So, if the put
+      // is called and succeeds, then the returned values from the put task must
+      // be non-null.
       if (putTask.getResult() != null) {
-        updateAbtWithActivatedExperiments(putTask.getResult().getAbtExperiments());
+        updateAbtWithActivatedExperiments(
+            putTask.getResult().getAbtExperiments());
       } else {
         // Should never happen.
         Log.e(TAG, "Activated configs written to disk are null.");
@@ -690,13 +736,16 @@ public class FirebaseRemoteConfig {
   }
 
   /**
-   * Asynchronously sets the defaults cache to the given default values, and persists the values to
-   * disk.
+   * Asynchronously sets the defaults cache to the given default values, and
+   * persists the values to disk.
    */
-  private void setDefaultsWithStringsMap(Map<String, String> defaultsStringMap) {
+  private void
+  setDefaultsWithStringsMap(Map<String, String> defaultsStringMap) {
     try {
       ConfigContainer defaultConfigs =
-          ConfigContainer.newBuilder().replaceConfigsWith(defaultsStringMap).build();
+          ConfigContainer.newBuilder()
+              .replaceConfigsWith(defaultsStringMap)
+              .build();
       defaultConfigsCache.putWithoutWaitingForDiskWrite(defaultConfigs);
     } catch (JSONException e) {
       Log.e(TAG, "The provided defaults map could not be processed.", e);
@@ -704,15 +753,18 @@ public class FirebaseRemoteConfig {
   }
 
   /**
-   * Asynchronously sets the defaults cache to the given default values, and persists the values to
-   * disk.
+   * Asynchronously sets the defaults cache to the given default values, and
+   * persists the values to disk.
    *
    * @return A task with result {@code null} on failure.
    */
-  private Task<Void> setDefaultsWithStringsMapAsync(Map<String, String> defaultsStringMap) {
+  private Task<Void>
+  setDefaultsWithStringsMapAsync(Map<String, String> defaultsStringMap) {
     ConfigContainer defaultConfigs = null;
     try {
-      defaultConfigs = ConfigContainer.newBuilder().replaceConfigsWith(defaultsStringMap).build();
+      defaultConfigs = ConfigContainer.newBuilder()
+                           .replaceConfigsWith(defaultsStringMap)
+                           .build();
     } catch (JSONException e) {
       Log.e(TAG, "The provided defaults map could not be processed.", e);
       return Tasks.forResult(null);
@@ -728,43 +780,45 @@ public class FirebaseRemoteConfig {
    *
    * @hide
    */
-  // TODO(issues/255): Find a cleaner way to test ABT component dependency without
-  // having to make this method visible.
+  // TODO(issues/255): Find a cleaner way to test ABT component dependency
+  // without having to make this method visible.
   @VisibleForTesting
   void updateAbtWithActivatedExperiments(@NonNull JSONArray abtExperiments) {
     if (firebaseAbt == null) {
-      // If there is no firebaseAbt instance, then this FRC is either in a non-3P namespace or
-      // in a non-main FirebaseApp, so there is no reason to call ABT.
-      // For more info: RemoteConfigComponent#isAbtSupported.
+      // If there is no firebaseAbt instance, then this FRC is either in a
+      // non-3P namespace or in a non-main FirebaseApp, so there is no reason to
+      // call ABT. For more info: RemoteConfigComponent#isAbtSupported.
       return;
     }
 
     try {
-      List<Map<String, String>> experimentInfoMaps = toExperimentInfoMaps(abtExperiments);
+      List<Map<String, String>> experimentInfoMaps =
+          toExperimentInfoMaps(abtExperiments);
       firebaseAbt.replaceAllExperiments(experimentInfoMaps);
     } catch (JSONException e) {
       Log.e(TAG, "Could not parse ABT experiments from the JSON response.", e);
     } catch (AbtException e) {
-      // TODO(issues/256): Find a way to log errors for all non-Analytics related exceptions
-      // without coupling the FRC and ABT SDKs.
+      // TODO(issues/256): Find a way to log errors for all non-Analytics
+      // related exceptions without coupling the FRC and ABT SDKs.
       Log.w(TAG, "Could not update ABT experiments.", e);
     }
   }
 
   /**
-   * Converts a JSON array of Firebase A/B Testing experiments into a Java list of String maps.
+   * Converts a JSON array of Firebase A/B Testing experiments into a Java list
+   * of String maps.
    *
-   * @param abtExperimentsJson A {@link JSONArray} of {@link JSONObject}s, where each object
-   *     represents a single experiment. Each {@link JSONObject} should only contain {@link String}
-   *     values.
-   * @return A {@link List} of {@code {@link Map}<String, String>}s, where each map represents a
-   *     single experiment.
-   * @throws JSONException If the {@code abtExperimentsJson} could not be converted into a list of
-   *     String maps.
+   * @param abtExperimentsJson A {@link JSONArray} of {@link JSONObject}s, where
+   *     each object represents a single experiment. Each {@link JSONObject}
+   *     should only contain {@link String} values.
+   * @return A {@link List} of {@code {@link Map}<String, String>}s, where each
+   *     map represents a single experiment.
+   * @throws JSONException If the {@code abtExperimentsJson} could not be
+   *     converted into a list of String maps.
    */
   @VisibleForTesting
-  static List<Map<String, String>> toExperimentInfoMaps(JSONArray abtExperimentsJson)
-      throws JSONException {
+  static List<Map<String, String>>
+  toExperimentInfoMaps(JSONArray abtExperimentsJson) throws JSONException {
     List<Map<String, String>> experimentInfoMaps = new ArrayList<>();
     for (int index = 0; index < abtExperimentsJson.length(); index++) {
       Map<String, String> experimentInfo = new HashMap<>();
@@ -781,9 +835,13 @@ public class FirebaseRemoteConfig {
     return experimentInfoMaps;
   }
 
-  /** Returns true if the fetched configs are fresher than the activated configs. */
-  private static boolean isFetchedFresh(
-      ConfigContainer fetched, @Nullable ConfigContainer activated) {
-    return activated == null || !fetched.getFetchTime().equals(activated.getFetchTime());
+  /**
+   * Returns true if the fetched configs are fresher than the activated
+   * configs.
+   */
+  private static boolean isFetchedFresh(ConfigContainer fetched,
+                                        @Nullable ConfigContainer activated) {
+    return activated == null ||
+        !fetched.getFetchTime().equals(activated.getFetchTime());
   }
 }

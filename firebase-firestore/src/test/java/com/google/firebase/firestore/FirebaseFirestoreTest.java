@@ -40,8 +40,8 @@ public class FirebaseFirestoreTest {
 
     app.enableEmulators(
         new EmulatorSettings.Builder()
-            .addEmulatedService(
-                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .addEmulatedService(FirebaseFirestore.EMULATOR,
+                                new EmulatedServiceSettings("10.0.2.2", 8080))
             .build());
 
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
@@ -56,13 +56,14 @@ public class FirebaseFirestoreTest {
     FirebaseApp app = getApp("getInstance_withEmulator_mergeSettingsSuccess");
     app.enableEmulators(
         new EmulatorSettings.Builder()
-            .addEmulatedService(
-                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .addEmulatedService(FirebaseFirestore.EMULATOR,
+                                new EmulatedServiceSettings("10.0.2.2", 8080))
             .build());
 
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
-    firestore.setFirestoreSettings(
-        new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build());
+    firestore.setFirestoreSettings(new FirebaseFirestoreSettings.Builder()
+                                       .setPersistenceEnabled(false)
+                                       .build());
 
     FirebaseFirestoreSettings settings = firestore.getFirestoreSettings();
 
@@ -76,14 +77,15 @@ public class FirebaseFirestoreTest {
     FirebaseApp app = getApp("getInstance_withEmulator_mergeSettingsFailure");
     app.enableEmulators(
         new EmulatorSettings.Builder()
-            .addEmulatedService(
-                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .addEmulatedService(FirebaseFirestore.EMULATOR,
+                                new EmulatedServiceSettings("10.0.2.2", 8080))
             .build());
 
     try {
       FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
-      firestore.setFirestoreSettings(
-          new FirebaseFirestoreSettings.Builder().setHost("myhost.com").build());
+      firestore.setFirestoreSettings(new FirebaseFirestoreSettings.Builder()
+                                         .setHost("myhost.com")
+                                         .build());
       fail("Exception should be thrown");
     } catch (Exception e) {
       assertTrue(e instanceof IllegalStateException);
@@ -98,8 +100,10 @@ public class FirebaseFirestoreTest {
     FirebaseApp app = getApp("setSettings_repeatedSuccess");
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
 
-    FirebaseFirestoreSettings settings =
-        new FirebaseFirestoreSettings.Builder().setHost("myhost.com").setSslEnabled(false).build();
+    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                                             .setHost("myhost.com")
+                                             .setSslEnabled(false)
+                                             .build();
     firestore.setFirestoreSettings(settings);
 
     // This should 'start' Firestore
@@ -114,14 +118,15 @@ public class FirebaseFirestoreTest {
     FirebaseApp app = getApp("setSettings_repeatedSuccess_withEmulator");
     app.enableEmulators(
         new EmulatorSettings.Builder()
-            .addEmulatedService(
-                FirebaseFirestore.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 8080))
+            .addEmulatedService(FirebaseFirestore.EMULATOR,
+                                new EmulatedServiceSettings("10.0.2.2", 8080))
             .build());
 
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
 
-    FirebaseFirestoreSettings settings =
-        new FirebaseFirestoreSettings.Builder().setPersistenceEnabled(false).build();
+    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                                             .setPersistenceEnabled(false)
+                                             .build();
     firestore.setFirestoreSettings(settings);
 
     // This should 'start' Firestore
@@ -136,8 +141,10 @@ public class FirebaseFirestoreTest {
     FirebaseApp app = getApp("setSettings_repeatedFailure");
     FirebaseFirestore firestore = FirebaseFirestore.getInstance(app);
 
-    FirebaseFirestoreSettings settings =
-        new FirebaseFirestoreSettings.Builder().setHost("myhost.com").setSslEnabled(false).build();
+    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                                             .setHost("myhost.com")
+                                             .setSslEnabled(false)
+                                             .build();
 
     FirebaseFirestoreSettings otherSettings =
         new FirebaseFirestoreSettings.Builder()
@@ -155,10 +162,8 @@ public class FirebaseFirestoreTest {
       fail("Exception should be thrown");
     } catch (Exception e) {
       assertTrue(e instanceof IllegalStateException);
-      assertTrue(
-          e.getMessage()
-              .startsWith(
-                  "FirebaseFirestore has already been started and its settings can no longer be changed."));
+      assertTrue(e.getMessage().startsWith(
+          "FirebaseFirestore has already been started and its settings can no longer be changed."));
     }
   }
 

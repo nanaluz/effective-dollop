@@ -33,13 +33,17 @@ public class FirebaseFunctionsTest {
   public void testGetUrl() {
     FirebaseApp app = getApp("testGetUrl");
 
-    FirebaseFunctions functions = FirebaseFunctions.getInstance(app, "my-region");
+    FirebaseFunctions functions =
+        FirebaseFunctions.getInstance(app, "my-region");
     URL url = functions.getURL("my-endpoint");
-    assertEquals("https://my-region-my-project.cloudfunctions.net/my-endpoint", url.toString());
+    assertEquals("https://my-region-my-project.cloudfunctions.net/my-endpoint",
+                 url.toString());
 
     functions = FirebaseFunctions.getInstance(app);
     url = functions.getURL("my-endpoint");
-    assertEquals("https://us-central1-my-project.cloudfunctions.net/my-endpoint", url.toString());
+    assertEquals(
+        "https://us-central1-my-project.cloudfunctions.net/my-endpoint",
+        url.toString());
   }
 
   @Test
@@ -48,16 +52,19 @@ public class FirebaseFunctionsTest {
 
     app.enableEmulators(
         new EmulatorSettings.Builder()
-            .addEmulatedService(
-                FirebaseFunctions.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 5001))
+            .addEmulatedService(FirebaseFunctions.EMULATOR,
+                                new EmulatedServiceSettings("10.0.2.2", 5001))
             .build());
 
-    URL withRegion = FirebaseFunctions.getInstance(app, "my-region").getURL("my-endpoint");
-    assertEquals("http://10.0.2.2:5001/my-project/my-region/my-endpoint", withRegion.toString());
+    URL withRegion =
+        FirebaseFunctions.getInstance(app, "my-region").getURL("my-endpoint");
+    assertEquals("http://10.0.2.2:5001/my-project/my-region/my-endpoint",
+                 withRegion.toString());
 
-    URL withoutRegion = FirebaseFunctions.getInstance(app).getURL("my-endpoint");
-    assertEquals(
-        "http://10.0.2.2:5001/my-project/us-central1/my-endpoint", withoutRegion.toString());
+    URL withoutRegion =
+        FirebaseFunctions.getInstance(app).getURL("my-endpoint");
+    assertEquals("http://10.0.2.2:5001/my-project/us-central1/my-endpoint",
+                 withoutRegion.toString());
   }
 
   @Test
@@ -66,8 +73,8 @@ public class FirebaseFunctionsTest {
 
     app.enableEmulators(
         new EmulatorSettings.Builder()
-            .addEmulatedService(
-                FirebaseFunctions.EMULATOR, new EmulatedServiceSettings("10.0.2.2", 5001))
+            .addEmulatedService(FirebaseFunctions.EMULATOR,
+                                new EmulatedServiceSettings("10.0.2.2", 5001))
             .build());
 
     FirebaseFunctions functions = FirebaseFunctions.getInstance(app);
