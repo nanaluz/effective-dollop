@@ -1,0 +1,131 @@
+// Copyright 2018 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
+buildscript {
+  repositories {
+    google()
+    jcenter()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:3.3.2"
+    classpath "com.google.gms:google-services:4.0.0"
+  }
+}
+
+apply plugin: "com.android.application"
+
+android {
+  compileSdkVersion 28
+
+  defaultConfig {
+    minSdkVersion 16
+    multiDexEnabled true
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  flavorDimensions "systemUnderTest"
+
+  productFlavors {
+    combined {
+      dimension "systemUnderTest"
+      applicationId "com.google.firebase.testing.combined"
+    }
+
+    database {
+      dimension "systemUnderTest"
+      applicationId "com.google.firebase.testing.database"
+    }
+
+    firestore {
+      dimension "systemUnderTest"
+      applicationId "com.google.firebase.testing.firestore"
+    }
+
+    storage {
+      dimension "systemUnderTest"
+      applicationId "com.google.firebase.testing.storage"
+    }
+  }
+
+  sourceSets {
+    combined {
+      java.srcDirs = [
+          "src/combined/java",
+          "src/database/java",
+          "src/firestore/java",
+          "src/functions/java",
+          "src/remoteConfig/java",
+          "src/storage/java",
+      ]
+    }
+  }
+}
+
+repositories {
+  google()
+  jcenter()
+
+  // This is necessary for Bill of Materials injection. This repository is created by running the
+  // `publishAllToBuildDir` task on the main firebase-android-sdk project.
+  maven {
+    url "../build/m2repository/"
+  }
+}
+
+apply from: "configure.gradle"
+
+dependencies {
+  // Common
+  api "androidx.test:runner:1.2.0"
+  api "com.google.truth:truth:0.45"
+  api "junit:junit:4.12"
+
+  implementation "androidx.test:rules:1.2.0"
+  implementation "com.google.firebase:firebase-common"
+
+  // All
+  combinedImplementation "com.google.firebase:firebase-auth"
+  combinedImplementation "com.google.firebase:firebase-database"
+  combinedImplementation "com.google.firebase:firebase-firestore"
+  combinedImplementation "com.google.firebase:firebase-functions"
+  combinedImplementation "com.google.firebase:firebase-config"
+  combinedImplementation "com.google.firebase:firebase-storage"
+
+  // Database
+  databaseImplementation "com.google.firebase:firebase-auth"
+  databaseImplementation "com.google.firebase:firebase-database"
+
+  // Firestore
+  firestoreImplementation "com.google.firebase:firebase-auth"
+  firestoreImplementation "com.google.firebase:firebase-firestore"
+
+  // Storage
+  storageImplementation "com.google.firebase:firebase-auth"
+  storageImplementation "com.google.firebase:firebase-storage"
+}
+
+clean.doLast {
+  def paths = Files.newDirectoryStream(Paths.get("."), "build-*")
+
+  for (Path path : paths) {
+    project.delete "$path/"
+  }
+}
+
+apply plugin: "com.google.gms.google-services"
