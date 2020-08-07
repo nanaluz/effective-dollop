@@ -39,12 +39,14 @@ public class ParseUrlTest {
     assertEquals("gsoltis.firebaseio.com", parsed.repoInfo.host);
     assertEquals("gsoltis.firebaseio.com", parsed.repoInfo.internalHost);
 
-    parsed = Utilities.parseUrl("http://gsoltis.firebaseio.com/foo/empty space");
+    parsed =
+        Utilities.parseUrl("http://gsoltis.firebaseio.com/foo/empty space");
     assertEquals("/foo/empty space", parsed.path.toString());
     assertEquals("gsoltis.firebaseio.com", parsed.repoInfo.host);
     assertEquals("gsoltis.firebaseio.com", parsed.repoInfo.internalHost);
 
-    parsed = Utilities.parseUrl("http://gsoltis.firebaseio.com/foo/\\;:@\uD83D\uDE00");
+    parsed = Utilities.parseUrl(
+        "http://gsoltis.firebaseio.com/foo/\\;:@\uD83D\uDE00");
     assertEquals("/foo/\\;:@\uD83D\uDE00", parsed.path.toString());
     assertEquals("gsoltis.firebaseio.com", parsed.repoInfo.host);
     assertEquals("gsoltis.firebaseio.com", parsed.repoInfo.internalHost);
@@ -58,8 +60,8 @@ public class ParseUrlTest {
 
   @Test
   public void testUrlParsingSpecialCharacters() throws DatabaseException {
-    ParsedUrl parsed =
-        Utilities.parseUrl("http://gsoltis.firebaseio.com/a%b&c@d/+space: /non-ascii:ø");
+    ParsedUrl parsed = Utilities.parseUrl(
+        "http://gsoltis.firebaseio.com/a%b&c@d/+space: /non-ascii:ø");
     assertEquals("/a%b&c@d/ space: /non-ascii:ø", parsed.path.toString());
   }
 
@@ -72,7 +74,8 @@ public class ParseUrlTest {
 
   @Test
   public void testUrlParsingWithNamespace() throws DatabaseException {
-    ParsedUrl parsed = Utilities.parseUrl("http://localhost/foo/bar?ns=mrschmidt");
+    ParsedUrl parsed =
+        Utilities.parseUrl("http://localhost/foo/bar?ns=mrschmidt");
     assertEquals("mrschmidt", parsed.repoInfo.namespace);
 
     parsed = Utilities.parseUrl("http://10.0.2.2:9000/foo/bar?ns=mrschmidt");
@@ -93,9 +96,11 @@ public class ParseUrlTest {
 
   @Test
   public void testUrlParsingWithEmulator() {
-    EmulatedServiceSettings serviceSettings = new EmulatedServiceSettings("10.0.2.2", 9000);
+    EmulatedServiceSettings serviceSettings =
+        new EmulatedServiceSettings("10.0.2.2", 9000);
 
-    ParsedUrl parsedUrl = Utilities.parseUrl("https://myns.firebaseio.com", serviceSettings);
+    ParsedUrl parsedUrl =
+        Utilities.parseUrl("https://myns.firebaseio.com", serviceSettings);
     assertFalse(parsedUrl.repoInfo.secure);
     assertEquals(parsedUrl.repoInfo.host, "10.0.2.2:9000");
     assertEquals(parsedUrl.repoInfo.namespace, "myns");

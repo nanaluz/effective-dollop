@@ -41,7 +41,7 @@ class LicenseResolverPluginSpec extends Specification {
             id 'com.android.library'
             id 'LicenseResolverPlugin'
         }
-        
+
         android.compileSdkVersion = 26
 
         repositories {

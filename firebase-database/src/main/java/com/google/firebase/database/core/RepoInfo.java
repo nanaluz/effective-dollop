@@ -32,49 +32,29 @@ public final class RepoInfo {
   }
 
   public String toDebugString() {
-    return "(host="
-        + host
-        + ", secure="
-        + secure
-        + ", ns="
-        + namespace
-        + " internal="
-        + internalHost
-        + ")";
+    return "(host=" + host + ", secure=" + secure + ", ns=" + namespace +
+        " internal=" + internalHost + ")";
   }
 
   public URI getConnectionURL(String optLastSessionId) {
     String scheme = secure ? "wss" : "ws";
-    String url =
-        scheme
-            + "://"
-            + internalHost
-            + "/.ws?ns="
-            + namespace
-            + "&"
-            + VERSION_PARAM
-            + "="
-            + Constants.WIRE_PROTOCOL_VERSION;
+    String url = scheme + "://" + internalHost + "/.ws?ns=" + namespace + "&" +
+                 VERSION_PARAM + "=" + Constants.WIRE_PROTOCOL_VERSION;
     if (optLastSessionId != null) {
       url += "&" + LAST_SESSION_ID_PARAM + "=" + optLastSessionId;
     }
     return URI.create(url);
   }
 
-  public boolean isCacheableHost() {
-    return internalHost.startsWith("s-");
-  }
+  public boolean isCacheableHost() { return internalHost.startsWith("s-"); }
 
-  public boolean isSecure() {
-    return secure;
-  }
+  public boolean isSecure() { return secure; }
 
-  public boolean isDemoHost() {
-    return host.contains(".firebaseio-demo.com");
-  }
+  public boolean isDemoHost() { return host.contains(".firebaseio-demo.com"); }
 
   public boolean isCustomHost() {
-    return !host.contains(".firebaseio.com") && !host.contains(".firebaseio-demo.com");
+    return !host.contains(".firebaseio.com") &&
+        !host.contains(".firebaseio-demo.com");
   }
 
   @Override
@@ -86,7 +66,7 @@ public final class RepoInfo {
       return false;
     }
 
-    RepoInfo repoInfo = (RepoInfo) o;
+    RepoInfo repoInfo = (RepoInfo)o;
 
     if (secure != repoInfo.secure) {
       return false;
