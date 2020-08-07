@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Settings that control which Firebase services should access a local emulator, rather than
- * production.
+ * Settings that control which Firebase services should access a local emulator,
+ * rather than production.
  *
- * <p>TODO(samstern): Un-hide this once Firestore, Database, and Functions are implemented
+ * <p>TODO(samstern): Un-hide this once Firestore, Database, and Functions are
+ * implemented
  *
  * @see com.google.firebase.FirebaseApp#enableEmulators(EmulatorSettings)
  * @hide
@@ -33,11 +34,13 @@ import java.util.Map;
 public final class EmulatorSettings {
 
   /** Empty emulator settings to be used as an internal default */
-  public static final EmulatorSettings DEFAULT = new EmulatorSettings.Builder().build();
+  public static final EmulatorSettings DEFAULT =
+      new EmulatorSettings.Builder().build();
 
   public static final class Builder {
 
-    private final Map<FirebaseEmulator, EmulatedServiceSettings> settingsMap = new HashMap<>();
+    private final Map<FirebaseEmulator, EmulatedServiceSettings> settingsMap =
+        new HashMap<>();
 
     /** Constructs an empty builder. */
     public Builder() {}
@@ -50,11 +53,12 @@ public final class EmulatorSettings {
      * @return the builder, for chaining.
      */
     @NonNull
-    public Builder addEmulatedService(
-        @NonNull FirebaseEmulator emulator, @NonNull EmulatedServiceSettings settings) {
-      Preconditions.checkState(
-          !settingsMap.containsKey(emulator),
-          "Cannot call addEmulatedService twice for " + emulator.toString());
+    public Builder
+    addEmulatedService(@NonNull FirebaseEmulator emulator,
+                       @NonNull EmulatedServiceSettings settings) {
+      Preconditions.checkState(!settingsMap.containsKey(emulator),
+                               "Cannot call addEmulatedService twice for " +
+                                   emulator.toString());
       this.settingsMap.put(emulator, settings);
       return this;
     }
@@ -67,7 +71,8 @@ public final class EmulatorSettings {
 
   private final Map<FirebaseEmulator, EmulatedServiceSettings> settingsMap;
 
-  private EmulatorSettings(@NonNull Map<FirebaseEmulator, EmulatedServiceSettings> settingsMap) {
+  private EmulatorSettings(
+      @NonNull Map<FirebaseEmulator, EmulatedServiceSettings> settingsMap) {
     this.settingsMap = Collections.unmodifiableMap(settingsMap);
   }
 
@@ -77,7 +82,8 @@ public final class EmulatorSettings {
    * @hide
    */
   @Nullable
-  public EmulatedServiceSettings getServiceSettings(@NonNull FirebaseEmulator emulator) {
+  public EmulatedServiceSettings
+  getServiceSettings(@NonNull FirebaseEmulator emulator) {
     if (settingsMap.containsKey(emulator)) {
       return settingsMap.get(emulator);
     }

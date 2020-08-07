@@ -53,25 +53,27 @@ public class FirebaseDatabaseTest {
   @Test
   public void getInstance() {
     FirebaseDatabase db = FirebaseDatabase.getInstance();
-    assertEquals(
-        FirebaseApp.getInstance().getOptions().getDatabaseUrl(), db.getReference().toString());
+    assertEquals(FirebaseApp.getInstance().getOptions().getDatabaseUrl(),
+                 db.getReference().toString());
   }
 
   @Test
   public void getInstanceForApp() {
-    FirebaseApp app =
-        appForDatabaseUrl(IntegrationTestValues.getAltNamespace(), "getInstanceForApp");
+    FirebaseApp app = appForDatabaseUrl(IntegrationTestValues.getAltNamespace(),
+                                        "getInstanceForApp");
     FirebaseDatabase db = FirebaseDatabase.getInstance(app);
 
-    assertEquals(IntegrationTestValues.getAltNamespace(), db.getReference().toString());
+    assertEquals(IntegrationTestValues.getAltNamespace(),
+                 db.getReference().toString());
   }
 
   @Test
   public void getInstanceForAppWithEmulator() {
-    FirebaseApp app =
-        appForDatabaseUrl(IntegrationTestValues.getAltNamespace(), "getInstanceForAppWithEmulator");
+    FirebaseApp app = appForDatabaseUrl(IntegrationTestValues.getAltNamespace(),
+                                        "getInstanceForAppWithEmulator");
 
-    EmulatedServiceSettings serviceSettings = new EmulatedServiceSettings("10.0.2.2", 9000);
+    EmulatedServiceSettings serviceSettings =
+        new EmulatedServiceSettings("10.0.2.2", 9000);
     EmulatorSettings emulatorSettings =
         new EmulatorSettings.Builder()
             .addEmulatedService(FirebaseDatabase.EMULATOR, serviceSettings)
@@ -82,48 +84,56 @@ public class FirebaseDatabaseTest {
     DatabaseReference rootRef = db.getReference();
     assertEquals(rootRef.toString(), "http://10.0.2.2:9000");
 
-    DatabaseReference urlReference = db.getReferenceFromUrl("https://otherns.firebaseio.com");
+    DatabaseReference urlReference =
+        db.getReferenceFromUrl("https://otherns.firebaseio.com");
     assertEquals(urlReference.toString(), "http://10.0.2.2:9000");
   }
 
   @Test
   public void getInstanceForAppWithUrl() {
-    FirebaseApp app =
-        appForDatabaseUrl(IntegrationTestValues.getAltNamespace(), "getInstanceForAppWithUrl");
-    FirebaseDatabase db = FirebaseDatabase.getInstance(app, IntegrationTestValues.getNamespace());
+    FirebaseApp app = appForDatabaseUrl(IntegrationTestValues.getAltNamespace(),
+                                        "getInstanceForAppWithUrl");
+    FirebaseDatabase db =
+        FirebaseDatabase.getInstance(app, IntegrationTestValues.getNamespace());
 
-    assertEquals(IntegrationTestValues.getNamespace(), db.getReference().toString());
+    assertEquals(IntegrationTestValues.getNamespace(),
+                 db.getReference().toString());
   }
 
   @Test
   public void getInstanceForAppWithHttpsUrl() {
-    FirebaseApp app =
-        appForDatabaseUrl(IntegrationTestValues.getAltNamespace(), "getInstanceForAppWithHttpsUrl");
-    FirebaseDatabase db = FirebaseDatabase.getInstance(app, "https://tests.fblocal.com:9000");
+    FirebaseApp app = appForDatabaseUrl(IntegrationTestValues.getAltNamespace(),
+                                        "getInstanceForAppWithHttpsUrl");
+    FirebaseDatabase db =
+        FirebaseDatabase.getInstance(app, "https://tests.fblocal.com:9000");
 
-    assertEquals("https://tests.fblocal.com:9000", db.getReference().toString());
+    assertEquals("https://tests.fblocal.com:9000",
+                 db.getReference().toString());
   }
 
   @Test
   public void getDifferentInstanceForAppWithUrl() {
-    FirebaseApp app =
-        appForDatabaseUrl(
-            IntegrationTestValues.getNamespace(), "getDifferentInstanceForAppWithUrl");
+    FirebaseApp app = appForDatabaseUrl(IntegrationTestValues.getNamespace(),
+                                        "getDifferentInstanceForAppWithUrl");
     FirebaseDatabase unspecified = FirebaseDatabase.getInstance(app);
     FirebaseDatabase original =
         FirebaseDatabase.getInstance(app, IntegrationTestValues.getNamespace());
-    FirebaseDatabase alternate =
-        FirebaseDatabase.getInstance(app, IntegrationTestValues.getAltNamespace());
+    FirebaseDatabase alternate = FirebaseDatabase.getInstance(
+        app, IntegrationTestValues.getAltNamespace());
 
-    assertEquals(IntegrationTestValues.getNamespace(), unspecified.getReference().toString());
-    assertEquals(IntegrationTestValues.getNamespace(), original.getReference().toString());
-    assertEquals(IntegrationTestValues.getAltNamespace(), alternate.getReference().toString());
+    assertEquals(IntegrationTestValues.getNamespace(),
+                 unspecified.getReference().toString());
+    assertEquals(IntegrationTestValues.getNamespace(),
+                 original.getReference().toString());
+    assertEquals(IntegrationTestValues.getAltNamespace(),
+                 alternate.getReference().toString());
   }
 
   @Test
   public void getInstanceForAppWithInvalidUrls() {
     try {
-      FirebaseApp app = appForDatabaseUrl(null, "getInstanceForAppWithInvalidUrls-0");
+      FirebaseApp app =
+          appForDatabaseUrl(null, "getInstanceForAppWithInvalidUrls-0");
       FirebaseDatabase.getInstance(app);
       fail("should throw");
     } catch (DatabaseException e) {
@@ -131,7 +141,8 @@ public class FirebaseDatabaseTest {
     }
 
     try {
-      FirebaseApp app = appForDatabaseUrl("not-a-url", "getInstanceForAppWithInvalidUrls-1");
+      FirebaseApp app =
+          appForDatabaseUrl("not-a-url", "getInstanceForAppWithInvalidUrls-1");
       FirebaseDatabase.getInstance(app);
       fail("should throw");
     } catch (DatabaseException e) {
@@ -148,9 +159,8 @@ public class FirebaseDatabaseTest {
 
     try {
       FirebaseApp app =
-          appForDatabaseUrl(
-              "http://x.fblocal.com:9000/paths/are/not/allowed",
-              "getInstanceForAppWithInvalidUrls-3");
+          appForDatabaseUrl("http://x.fblocal.com:9000/paths/are/not/allowed",
+                            "getInstanceForAppWithInvalidUrls-3");
       FirebaseDatabase.getInstance(app);
       fail("should throw");
     } catch (DatabaseException e) {
@@ -159,7 +169,8 @@ public class FirebaseDatabaseTest {
 
     try {
       FirebaseApp app = emptyApp("getInstanceForAppWithInvalidUrls-4");
-      FirebaseDatabase.getInstance(app, "http://x.fblocal.com:9000/paths/are/not/allowed");
+      FirebaseDatabase.getInstance(
+          app, "http://x.fblocal.com:9000/paths/are/not/allowed");
       fail("should throw");
     } catch (DatabaseException e) {
       // expected
@@ -169,7 +180,8 @@ public class FirebaseDatabaseTest {
   @Test
   public void getReference() {
     FirebaseDatabase db = FirebaseDatabase.getInstance();
-    assertEquals(IntegrationTestValues.getNamespace() + "/foo", db.getReference("foo").toString());
+    assertEquals(IntegrationTestValues.getNamespace() + "/foo",
+                 db.getReference("foo").toString());
   }
 
   @Test
@@ -192,7 +204,8 @@ public class FirebaseDatabaseTest {
     config.setPersistenceCacheSizeBytes(1 * 1024 * 1024);
 
     try {
-      FirebaseDatabase db = new DatabaseReference("http://localhost", config).getDatabase();
+      FirebaseDatabase db =
+          new DatabaseReference("http://localhost", config).getDatabase();
       db.setPersistenceCacheSizeBytes(1 * 1024 * 1024);
       fail("should throw - can't modify after init");
     } catch (DatabaseException e) {
@@ -203,16 +216,18 @@ public class FirebaseDatabaseTest {
   @Test
   public void getReferenceFromURLWithEmptyPath() {
     FirebaseDatabase db = FirebaseDatabase.getInstance();
-    DatabaseReference ref = db.getReferenceFromUrl(IntegrationTestValues.getNamespace());
+    DatabaseReference ref =
+        db.getReferenceFromUrl(IntegrationTestValues.getNamespace());
     assertEquals(IntegrationTestValues.getNamespace(), ref.toString());
   }
 
   @Test
   public void getReferenceFromURLWithPath() {
     FirebaseDatabase db = FirebaseDatabase.getInstance();
-    DatabaseReference ref =
-        db.getReferenceFromUrl(IntegrationTestValues.getNamespace() + "/foo/bar");
-    assertEquals(IntegrationTestValues.getNamespace() + "/foo/bar", ref.toString());
+    DatabaseReference ref = db.getReferenceFromUrl(
+        IntegrationTestValues.getNamespace() + "/foo/bar");
+    assertEquals(IntegrationTestValues.getNamespace() + "/foo/bar",
+                 ref.toString());
   }
 
   @Test(expected = DatabaseException.class)
@@ -223,15 +238,19 @@ public class FirebaseDatabaseTest {
 
   @Test
   public void getReferenceWithCustomDatabaseUrl() {
-    FirebaseDatabase db = FirebaseDatabase.getInstance(IntegrationTestValues.getAltNamespace());
+    FirebaseDatabase db =
+        FirebaseDatabase.getInstance(IntegrationTestValues.getAltNamespace());
     db.getReferenceFromUrl(IntegrationTestValues.getAltNamespace());
   }
 
   @Test
   public void referenceEqualityForDatabase() {
-    FirebaseDatabase db1 = dbForDatabaseUrl(IntegrationTestValues.getNamespace(), "db1");
-    FirebaseDatabase db2 = dbForDatabaseUrl(IntegrationTestValues.getNamespace(), "db2");
-    FirebaseDatabase altDb = dbForDatabaseUrl(IntegrationTestValues.getAltNamespace(), "altdb");
+    FirebaseDatabase db1 =
+        dbForDatabaseUrl(IntegrationTestValues.getNamespace(), "db1");
+    FirebaseDatabase db2 =
+        dbForDatabaseUrl(IntegrationTestValues.getNamespace(), "db2");
+    FirebaseDatabase altDb =
+        dbForDatabaseUrl(IntegrationTestValues.getAltNamespace(), "altdb");
 
     DatabaseReference testRef1 = db1.getReference();
     DatabaseReference testRef2 = db1.getReference("foo");
@@ -260,12 +279,13 @@ public class FirebaseDatabaseTest {
     // call get reference to ensure everything's initialized.
     db.getReference();
 
-    // The default persistence key must be "default" to maintain backwards compatibility
-    // with persisted data.
+    // The default persistence key must be "default" to maintain backwards
+    // compatibility with persisted data.
     assertEquals("default", db.getConfig().getSessionPersistenceKey());
   }
 
-  private static DatabaseReference rootRefWithEngine(MockPersistenceStorageEngine engine) {
+  private static DatabaseReference
+  rootRefWithEngine(MockPersistenceStorageEngine engine) {
     DatabaseConfig config = IntegrationTestHelpers.newTestConfig();
     PersistenceManager persistenceManager =
         new DefaultPersistenceManager(config, engine, CachePolicy.NONE);
@@ -296,9 +316,11 @@ public class FirebaseDatabaseTest {
   }
 
   @Test
-  @Ignore("This test is flaky because cancel order isn't actually deterministic!")
+  @Ignore(
+      "This test is flaky because cancel order isn't actually deterministic!")
   // TODO: Need to fix
-  public void purgedWritesAreCancelledInOrder() {
+  public void
+  purgedWritesAreCancelledInOrder() {
     MockPersistenceStorageEngine engine = new MockPersistenceStorageEngine();
     DatabaseReference ref = rootRefWithEngine(engine);
     FirebaseDatabase app = ref.getDatabase();
@@ -307,46 +329,38 @@ public class FirebaseDatabaseTest {
 
     final List<String> order = new ArrayList<String>();
 
-    ref.push()
-        .setValue(
-            "test-value-1",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
-                order.add("1");
-              }
-            });
-    ref.push()
-        .setValue(
-            "test-value-2",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
-                order.add("2");
-              }
-            });
-    ref.push()
-        .setValue(
-            "test-value-3",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
-                order.add("3");
-              }
-            });
-    ref.push()
-        .setValue(
-            "test-value-4",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
-                order.add("4");
-              }
-            });
+    ref.push().setValue(
+        "test-value-1", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
+            order.add("1");
+          }
+        });
+    ref.push().setValue(
+        "test-value-2", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
+            order.add("2");
+          }
+        });
+    ref.push().setValue(
+        "test-value-3", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
+            order.add("3");
+          }
+        });
+    ref.push().setValue(
+        "test-value-4", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
+            order.add("4");
+          }
+        });
 
     IntegrationTestHelpers.waitForQueue(ref);
     Assert.assertEquals(4, engine.loadUserWrites().size());
@@ -367,28 +381,22 @@ public class FirebaseDatabaseTest {
 
     final List<String> order = new ArrayList<String>();
 
-    ref.push()
-        .onDisconnect()
-        .setValue(
-            "test-value-1",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
-                order.add("1");
-              }
-            });
-    ref.push()
-        .onDisconnect()
-        .setValue(
-            "test-value-2",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
-                order.add("2");
-              }
-            });
+    ref.push().onDisconnect().setValue(
+        "test-value-1", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
+            order.add("1");
+          }
+        });
+    ref.push().onDisconnect().setValue(
+        "test-value-2", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(error.getCode(), DatabaseError.WRITE_CANCELED);
+            order.add("2");
+          }
+        });
 
     IntegrationTestHelpers.waitForEvents(ref);
 
@@ -399,104 +407,98 @@ public class FirebaseDatabaseTest {
   }
 
   @Test
-  @Ignore("This test is flaky because cancel order isn't actually deterministic!")
+  @Ignore(
+      "This test is flaky because cancel order isn't actually deterministic!")
   // TODO: Need to fix
-  public void purgeWritesReraisesEvents() throws Throwable {
+  public void
+  purgeWritesReraisesEvents() throws Throwable {
     MockPersistenceStorageEngine engine = new MockPersistenceStorageEngine();
     DatabaseReference ref = rootRefWithEngine(engine).push();
     FirebaseDatabase app = ref.getDatabase();
 
-    new WriteFuture(
-            ref, fromSingleQuotedString("{'foo': 'foo-value', 'bar': {'qux': 'qux-value'}}"))
+    new WriteFuture(ref,
+                    fromSingleQuotedString(
+                        "{'foo': 'foo-value', 'bar': {'qux': 'qux-value'}}"))
         .timedGet();
 
     final List<Object> fooValues = new ArrayList<Object>();
     final List<Object> barQuuValues = new ArrayList<Object>();
     final List<Object> barQuxValues = new ArrayList<Object>();
 
-    ref.child("foo")
-        .addValueEventListener(
-            new ValueEventListener() {
-              @Override
-              public void onDataChange(DataSnapshot snapshot) {
-                fooValues.add(snapshot.getValue());
-              }
+    ref.child("foo").addValueEventListener(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot snapshot) {
+        fooValues.add(snapshot.getValue());
+      }
 
-              @Override
-              public void onCancelled(DatabaseError error) {}
-            });
+      @Override
+      public void onCancelled(DatabaseError error) {}
+    });
 
-    ref.child("bar/quu")
-        .addValueEventListener(
-            new ValueEventListener() {
-              @Override
-              public void onDataChange(DataSnapshot snapshot) {
-                barQuuValues.add(snapshot.getValue());
-              }
+    ref.child("bar/quu").addValueEventListener(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot snapshot) {
+        barQuuValues.add(snapshot.getValue());
+      }
 
-              @Override
-              public void onCancelled(DatabaseError error) {}
-            });
+      @Override
+      public void onCancelled(DatabaseError error) {}
+    });
 
-    ref.child("bar/qux")
-        .addValueEventListener(
-            new ValueEventListener() {
-              @Override
-              public void onDataChange(DataSnapshot snapshot) {
-                barQuxValues.add(snapshot.getValue());
-              }
+    ref.child("bar/qux").addValueEventListener(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot snapshot) {
+        barQuxValues.add(snapshot.getValue());
+      }
 
-              @Override
-              public void onCancelled(DatabaseError error) {}
-            });
+      @Override
+      public void onCancelled(DatabaseError error) {}
+    });
 
     app.goOffline();
 
-    List<Object> expectedFooValues =
-        Arrays.<Object>asList("foo-value", "new-foo-value", "newest-foo-value", "foo-value");
-    List<Object> expectedBarQuuValues = Arrays.<Object>asList(null, "quu-value", null);
+    List<Object> expectedFooValues = Arrays.<Object>asList(
+        "foo-value", "new-foo-value", "newest-foo-value", "foo-value");
+    List<Object> expectedBarQuuValues =
+        Arrays.<Object>asList(null, "quu-value", null);
     List<Object> expectedBarQuxValues =
         Arrays.<Object>asList("qux-value", "new-qux-value", "qux-value");
 
     final List<String> cancelOrder = new ArrayList<String>();
 
-    ref.child("foo")
-        .setValue(
-            "new-foo-value",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
-                // This should be after we raised the events
-                assertEquals("foo-value", fooValues.get(fooValues.size() - 1));
-                cancelOrder.add("foo-1");
-              }
-            });
-    ref.child("bar")
-        .updateChildren(
-            fromSingleQuotedString("{'quu': 'quu-value', 'qux': 'new-qux-value'}"),
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
-                // This should be after we raised the events
-                assertEquals("qux-value", barQuxValues.get(barQuuValues.size() - 1));
-                assertEquals(null, barQuuValues.get(barQuuValues.size() - 1));
-                cancelOrder.add("bar");
-              }
-            });
-    ref.child("foo")
-        .setValue(
-            "newest-foo-value",
-            new DatabaseReference.CompletionListener() {
-              @Override
-              public void onComplete(DatabaseError error, DatabaseReference ref) {
-                assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
-                // This should be after we raised the events
-                assertEquals("foo-value", fooValues.get(fooValues.size() - 1));
-                cancelOrder.add("foo-2");
-              }
-            });
+    ref.child("foo").setValue(
+        "new-foo-value", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
+            // This should be after we raised the events
+            assertEquals("foo-value", fooValues.get(fooValues.size() - 1));
+            cancelOrder.add("foo-1");
+          }
+        });
+    ref.child("bar").updateChildren(
+        fromSingleQuotedString("{'quu': 'quu-value', 'qux': 'new-qux-value'}"),
+        new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
+            // This should be after we raised the events
+            assertEquals("qux-value",
+                         barQuxValues.get(barQuuValues.size() - 1));
+            assertEquals(null, barQuuValues.get(barQuuValues.size() - 1));
+            cancelOrder.add("bar");
+          }
+        });
+    ref.child("foo").setValue(
+        "newest-foo-value", new DatabaseReference.CompletionListener() {
+          @Override
+          public void onComplete(DatabaseError error, DatabaseReference ref) {
+            assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
+            // This should be after we raised the events
+            assertEquals("foo-value", fooValues.get(fooValues.size() - 1));
+            cancelOrder.add("foo-2");
+          }
+        });
 
     app.purgeOutstandingWrites();
 
@@ -526,60 +528,60 @@ public class FirebaseDatabaseTest {
 
     final List<String> events = new ArrayList<String>();
 
-    ref.addValueEventListener(
-        new ValueEventListener() {
-          @Override
-          public void onDataChange(DataSnapshot snapshot) {
-            events.add("value-" + snapshot.getValue());
-          }
+    ref.addValueEventListener(new ValueEventListener() {
+      @Override
+      public void onDataChange(DataSnapshot snapshot) {
+        events.add("value-" + snapshot.getValue());
+      }
 
-          @Override
-          public void onCancelled(DatabaseError error) {}
-        });
+      @Override
+      public void onCancelled(DatabaseError error) {}
+    });
 
     // Make sure the first value event is fired
     IntegrationTestHelpers.waitForRoundtrip(ref);
 
     app.goOffline();
 
-    ref.runTransaction(
-        new Transaction.Handler() {
-          @Override
-          public Transaction.Result doTransaction(MutableData currentData) {
-            currentData.setValue("1");
-            return Transaction.success(currentData);
-          }
+    ref.runTransaction(new Transaction.Handler() {
+      @Override
+      public Transaction.Result doTransaction(MutableData currentData) {
+        currentData.setValue("1");
+        return Transaction.success(currentData);
+      }
 
-          @Override
-          public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-            assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
-            events.add("cancel-1");
-          }
-        });
+      @Override
+      public void onComplete(DatabaseError error, boolean committed,
+                             DataSnapshot currentData) {
+        assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
+        events.add("cancel-1");
+      }
+    });
 
-    ref.runTransaction(
-        new Transaction.Handler() {
-          @Override
-          public Transaction.Result doTransaction(MutableData currentData) {
-            currentData.setValue("2");
-            return Transaction.success(currentData);
-          }
+    ref.runTransaction(new Transaction.Handler() {
+      @Override
+      public Transaction.Result doTransaction(MutableData currentData) {
+        currentData.setValue("2");
+        return Transaction.success(currentData);
+      }
 
-          @Override
-          public void onComplete(DatabaseError error, boolean committed, DataSnapshot currentData) {
-            assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
-            events.add("cancel-2");
-          }
-        });
+      @Override
+      public void onComplete(DatabaseError error, boolean committed,
+                             DataSnapshot currentData) {
+        assertEquals(DatabaseError.WRITE_CANCELED, error.getCode());
+        events.add("cancel-2");
+      }
+    });
 
     ref.getDatabase().purgeOutstandingWrites();
 
     IntegrationTestHelpers.waitForEvents(ref);
 
-    // The order should really be cancel-1 then cancel-2, but too difficult to implement currently.
-    assertEquals(
-        Arrays.asList("value-null", "value-1", "value-2", "value-null", "cancel-2", "cancel-1"),
-        events);
+    // The order should really be cancel-1 then cancel-2, but too difficult to
+    // implement currently.
+    assertEquals(Arrays.asList("value-null", "value-1", "value-2", "value-null",
+                               "cancel-2", "cancel-1"),
+                 events);
   }
 
   private static FirebaseApp emptyApp(String appId) {

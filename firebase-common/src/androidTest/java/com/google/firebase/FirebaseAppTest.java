@@ -69,8 +69,10 @@ import org.mockito.stubbing.Answer;
 // TODO(arondeak): uncomment lines when Firebase API targets are in integ.
 @RunWith(AndroidJUnit4.class)
 public class FirebaseAppTest {
-  protected static final String GOOGLE_APP_ID = "1:855246033427:android:6e48bff8253f3f6e6e";
-  protected static final String GOOGLE_API_KEY = "AIzaSyD3asb-2pEZVqMkmL6M9N6nHZRR_znhrh0";
+  protected static final String GOOGLE_APP_ID =
+      "1:855246033427:android:6e48bff8253f3f6e6e";
+  protected static final String GOOGLE_API_KEY =
+      "AIzaSyD3asb-2pEZVqMkmL6M9N6nHZRR_znhrh0";
 
   protected static final FirebaseOptions OPTIONS =
       new FirebaseOptions.Builder()
@@ -98,15 +100,15 @@ public class FirebaseAppTest {
 
   @Test
   public void testBackgroundStateChangeCallbacks() {
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
     firebaseApp.setAutomaticResourceManagementEnabled(true);
     final AtomicBoolean backgroundState = new AtomicBoolean();
     final AtomicInteger callbackCount = new AtomicInteger();
-    firebaseApp.addBackgroundStateChangeListener(
-        background -> {
-          backgroundState.set(background);
-          callbackCount.incrementAndGet();
-        });
+    firebaseApp.addBackgroundStateChangeListener(background -> {
+      backgroundState.set(background);
+      callbackCount.incrementAndGet();
+    });
     assertThat(callbackCount.get()).isEqualTo(0);
 
     // App moves to the background.
@@ -121,13 +123,15 @@ public class FirebaseAppTest {
   }
 
   @Test
-  public void testInitializeApp_shouldPublishUserAgentPublisherThatReturnsPublishedVersions() {
+  public void
+  testInitializeApp_shouldPublishUserAgentPublisherThatReturnsPublishedVersions() {
     Context mockContext = createForwardingMockContext();
     FirebaseApp firebaseApp = FirebaseApp.initializeApp(mockContext);
 
     TestUserAgentDependentComponent userAgentDependant =
         firebaseApp.get(TestUserAgentDependentComponent.class);
-    UserAgentPublisher userAgentPublisher = userAgentDependant.getUserAgentPublisher();
+    UserAgentPublisher userAgentPublisher =
+        userAgentDependant.getUserAgentPublisher();
     String[] actualUserAgent = userAgentPublisher.getUserAgent().split(" ");
     Arrays.sort(actualUserAgent);
 
@@ -141,12 +145,13 @@ public class FirebaseAppTest {
 
     TestUserAgentDependentComponent userAgentDependant =
         firebaseApp.get(TestUserAgentDependentComponent.class);
-    UserAgentPublisher userAgentPublisher = userAgentDependant.getUserAgentPublisher();
+    UserAgentPublisher userAgentPublisher =
+        userAgentDependant.getUserAgentPublisher();
     String[] actualUserAgent = userAgentPublisher.getUserAgent().split(" ");
     Arrays.sort(actualUserAgent);
 
-    // After sorting the user agents are expected to be {"fire-android/", "fire-auth/x.y.z",
-    // "fire-core/x.y.z", "test-component/1.2.3"}
+    // After sorting the user agents are expected to be {"fire-android/",
+    // "fire-auth/x.y.z", "fire-core/x.y.z", "test-component/1.2.3"}
     assertThat(actualUserAgent[0]).contains("fire-analytics");
     assertThat(actualUserAgent[1]).contains("fire-android");
     assertThat(actualUserAgent[2]).contains("fire-auth");
@@ -155,7 +160,8 @@ public class FirebaseAppTest {
 
   @Test
   public void testRemovedBackgroundStateChangeCallbacksDontFire() {
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
     final AtomicInteger callbackCount = new AtomicInteger();
     FirebaseApp.BackgroundStateChangeListener listener =
         background -> callbackCount.incrementAndGet();
@@ -172,16 +178,17 @@ public class FirebaseAppTest {
   }
 
   @Test
-  public void testBackgroundStateChangeCallbacksDontFire_AutomaticResourceManagementTurnedOff() {
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
+  public void
+  testBackgroundStateChangeCallbacksDontFire_AutomaticResourceManagementTurnedOff() {
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
     firebaseApp.setAutomaticResourceManagementEnabled(true);
     final AtomicInteger callbackCount = new AtomicInteger();
     final AtomicBoolean backgroundState = new AtomicBoolean();
-    FirebaseApp.BackgroundStateChangeListener listener =
-        background -> {
-          backgroundState.set(background);
-          callbackCount.incrementAndGet();
-        };
+    FirebaseApp.BackgroundStateChangeListener listener = background -> {
+      backgroundState.set(background);
+      callbackCount.incrementAndGet();
+    };
     firebaseApp.addBackgroundStateChangeListener(listener);
 
     // App moves to the background.
@@ -189,8 +196,8 @@ public class FirebaseAppTest {
 
     assertThat(callbackCount.get()).isEqualTo(1);
 
-    // Turning off automatic resource management fires foreground event, if the current state
-    // is background.
+    // Turning off automatic resource management fires foreground event, if the
+    // current state is background.
     assertThat(backgroundDetector.isInBackground()).isTrue();
     firebaseApp.setAutomaticResourceManagementEnabled(false);
     assertThat(callbackCount.get()).isEqualTo(2);
@@ -217,23 +224,28 @@ public class FirebaseAppTest {
     String name = "myApp";
     FirebaseApp.initializeApp(targetContext, OPTIONS, name);
     FirebaseApp.clearInstancesForTest();
-    assertThrows(IllegalStateException.class, () -> FirebaseApp.getInstance(name));
+    assertThrows(IllegalStateException.class,
+                 () -> FirebaseApp.getInstance(name));
   }
 
   @Test
   public void testRehydratingDeletedInstanceThrows() {
     final String name = "myApp";
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, name);
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, name);
     firebaseApp.delete();
     FirebaseApp.clearInstancesForTest();
-    assertThrows(IllegalStateException.class, () -> FirebaseApp.getInstance(name));
+    assertThrows(IllegalStateException.class,
+                 () -> FirebaseApp.getInstance(name));
   }
 
   @Test
   public void testDeleteCallback() {
     String appName = "myApp";
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, appName);
-    FirebaseAppLifecycleListener listener = mock(FirebaseAppLifecycleListener.class);
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, appName);
+    FirebaseAppLifecycleListener listener =
+        mock(FirebaseAppLifecycleListener.class);
     firebaseApp.addLifecycleEventListener(listener);
     firebaseApp.delete();
 
@@ -246,27 +258,22 @@ public class FirebaseAppTest {
 
   @Test
   public void testGetApps() {
-    FirebaseApp app1 = FirebaseApp.initializeApp(targetContext, OPTIONS, "app1");
-    FirebaseApp app2 = FirebaseApp.initializeApp(targetContext, OPTIONS, "app2");
+    FirebaseApp app1 =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, "app1");
+    FirebaseApp app2 =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, "app2");
     assertThat(FirebaseApp.getApps(targetContext)).containsExactly(app1, app2);
   }
 
   @Test
   public void testInvokeAfterDeleteThrows() throws Exception {
     // delete and hidden methods shouldn't throw even after delete.
-    Collection<String> allowedToCallAfterDelete =
-        Arrays.asList(
-            "addBackgroundStateChangeListener",
-            "delete",
-            "equals",
-            "getListeners",
-            "getPersistenceKey",
-            "hashCode",
-            "isDefaultApp",
-            "removeBackgroundStateChangeListener",
-            "setTokenProvider",
-            "toString");
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
+    Collection<String> allowedToCallAfterDelete = Arrays.asList(
+        "addBackgroundStateChangeListener", "delete", "equals", "getListeners",
+        "getPersistenceKey", "hashCode", "isDefaultApp",
+        "removeBackgroundStateChangeListener", "setTokenProvider", "toString");
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
     firebaseApp.delete();
     for (Method method : firebaseApp.getClass().getDeclaredMethods()) {
       int modifiers = method.getModifiers();
@@ -277,15 +284,13 @@ public class FirebaseAppTest {
             fail("Method expected to throw, but didn't " + method.getName());
           }
         } catch (InvocationTargetException e) {
-          if (!(e.getCause() instanceof IllegalStateException)
-              || e.getCause().getMessage().equals("FirebaseApp was deleted.")) {
+          if (!(e.getCause() instanceof IllegalStateException) ||
+              e.getCause().getMessage().equals("FirebaseApp was deleted.")) {
             fail(
-                "Expected FirebaseApp#"
-                    + method.getName()
-                    + " to throw "
-                    + "IllegalStateException with message \"FirebaseApp was deleted\", "
-                    + "but instead got "
-                    + e.getCause());
+                "Expected FirebaseApp#" + method.getName() + " to throw "
+                +
+                "IllegalStateException with message \"FirebaseApp was deleted\", "
+                + "but instead got " + e.getCause());
           }
         }
       }
@@ -295,13 +300,15 @@ public class FirebaseAppTest {
   @Test
   public void testPersistenceKeyIsBijective() {
     String name = "myApp";
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, name);
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, name);
     String persistenceKey = firebaseApp.getPersistenceKey();
 
     @SuppressWarnings("StringSplitter")
     String[] parts = persistenceKey.split("\\+");
     assertThat(new String(decodeUrlSafeNoPadding(parts[0]))).isEqualTo(name);
-    assertThat(new String(decodeUrlSafeNoPadding(parts[1]))).isEqualTo(GOOGLE_APP_ID);
+    assertThat(new String(decodeUrlSafeNoPadding(parts[1])))
+        .isEqualTo(GOOGLE_APP_ID);
   }
 
   // Order of test cases matters.
@@ -312,7 +319,8 @@ public class FirebaseAppTest {
 
   @Test
   public void testApiInitializedForNonDefaultApp() {
-    FirebaseApp firebaseApp = FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
+    FirebaseApp firebaseApp =
+        FirebaseApp.initializeApp(targetContext, OPTIONS, "myApp");
     assertThat(firebaseApp.isDefaultApp()).isFalse();
 
     EagerSdkVerifier sdkVerifier = firebaseApp.get(EagerSdkVerifier.class);
@@ -343,7 +351,8 @@ public class FirebaseAppTest {
   @Test
   public void testInitializeFromContentProviderInSharedProcess() {
     // See http://b/30242033.
-    FirebaseApp defaultApp = FirebaseApp.initializeApp(targetContext.getApplicationContext());
+    FirebaseApp defaultApp =
+        FirebaseApp.initializeApp(targetContext.getApplicationContext());
     assertThat(defaultApp).isNotNull();
   }
 
@@ -355,7 +364,8 @@ public class FirebaseAppTest {
     Context appContext = mockContext.getApplicationContext();
 
     assertThat(firebaseApp.get(Context.class)).isSameInstanceAs(appContext);
-    assertThat(firebaseApp.get(FirebaseApp.class)).isSameInstanceAs(firebaseApp);
+    assertThat(firebaseApp.get(FirebaseApp.class))
+        .isSameInstanceAs(firebaseApp);
 
     TestComponentOne one = firebaseApp.get(TestComponentOne.class);
     assertThat(one).isNotNull();
@@ -425,13 +435,16 @@ public class FirebaseAppTest {
     Context mockContext = createForwardingMockContext();
     FirebaseApp firebaseApp = FirebaseApp.initializeApp(mockContext);
 
-    // A developer would call FirebaseDatabase.EMULATOR but we can't introduce that
-    // dependency for this test.
+    // A developer would call FirebaseDatabase.EMULATOR but we can't introduce
+    // that dependency for this test.
     FirebaseEmulator emulator = FirebaseEmulator.forName("database");
 
-    EmulatedServiceSettings databaseSettings = new EmulatedServiceSettings("10.0.2.2", 9000);
+    EmulatedServiceSettings databaseSettings =
+        new EmulatedServiceSettings("10.0.2.2", 9000);
     EmulatorSettings emulatorSettings =
-        new EmulatorSettings.Builder().addEmulatedService(emulator, databaseSettings).build();
+        new EmulatorSettings.Builder()
+            .addEmulatedService(emulator, databaseSettings)
+            .build();
 
     // Set twice
     firebaseApp.enableEmulators(emulatorSettings);
@@ -445,23 +458,31 @@ public class FirebaseAppTest {
 
     FirebaseEmulator emulator = FirebaseEmulator.forName("database");
 
-    EmulatedServiceSettings databaseSettings = new EmulatedServiceSettings("10.0.2.2", 9000);
+    EmulatedServiceSettings databaseSettings =
+        new EmulatedServiceSettings("10.0.2.2", 9000);
     EmulatorSettings emulatorSettings =
-        new EmulatorSettings.Builder().addEmulatedService(emulator, databaseSettings).build();
+        new EmulatorSettings.Builder()
+            .addEmulatedService(emulator, databaseSettings)
+            .build();
     firebaseApp.enableEmulators(emulatorSettings);
 
     // Access (as if from the Database SDK)
     firebaseApp.getEmulatorSettings().getServiceSettings(emulator);
 
     // Try to set again
-    assertThrows(IllegalStateException.class, () -> firebaseApp.enableEmulators(emulatorSettings));
+    assertThrows(IllegalStateException.class,
+                 () -> firebaseApp.enableEmulators(emulatorSettings));
   }
 
-  /** Returns mock context that forwards calls to targetContext and localBroadcastManager. */
+  /**
+   * Returns mock context that forwards calls to targetContext and
+   * localBroadcastManager.
+   */
   private Context createForwardingMockContext() {
-    final UserManager spyUserManager = spy(targetContext.getSystemService(UserManager.class));
+    final UserManager spyUserManager =
+        spy(targetContext.getSystemService(UserManager.class));
     when(spyUserManager.isUserUnlocked())
-        .thenAnswer((Answer<Boolean>) invocation -> isUserUnlocked.get());
+        .thenAnswer((Answer<Boolean>)invocation -> isUserUnlocked.get());
     final ContextWrapper applicationContextWrapper =
         new ContextWrapper(targetContext) {
           @Override
@@ -477,7 +498,8 @@ public class FirebaseAppTest {
           }
 
           @Override
-          public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+          public Intent registerReceiver(BroadcastReceiver receiver,
+                                         IntentFilter filter) {
             localBroadcastManager.registerReceiver(receiver, filter);
             return null;
           }
@@ -487,20 +509,21 @@ public class FirebaseAppTest {
             localBroadcastManager.unregisterReceiver(receiver);
           }
         };
-    ContextWrapper contextWrapper =
-        new ContextWrapper(targetContext) {
-          @Override
-          public Context getApplicationContext() {
-            return applicationContextWrapper;
-          }
-        };
+    ContextWrapper contextWrapper = new ContextWrapper(targetContext) {
+      @Override
+      public Context getApplicationContext() {
+        return applicationContextWrapper;
+      }
+    };
 
     return contextWrapper;
   }
 
-  private static void invokePublicInstanceMethodWithDefaultValues(Object instance, Method method)
+  private static void
+  invokePublicInstanceMethodWithDefaultValues(Object instance, Method method)
       throws InvocationTargetException, IllegalAccessException {
-    List<Object> parameters = new ArrayList<>(method.getParameterTypes().length);
+    List<Object> parameters =
+        new ArrayList<>(method.getParameterTypes().length);
     for (Class<?> parameterType : method.getParameterTypes()) {
       parameters.add(Defaults.defaultValue(parameterType));
     }

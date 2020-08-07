@@ -25,24 +25,15 @@ import com.google.firebase.firestore.util.AsyncQueue;
 public final class AccessHelper {
 
   /** Makes the FirebaseFirestore constructor accessible. */
-  public static FirebaseFirestore newFirebaseFirestore(
-      Context context,
-      DatabaseId databaseId,
-      String persistenceKey,
-      CredentialsProvider credentialsProvider,
-      AsyncQueue asyncQueue,
-      FirebaseApp firebaseApp,
-      FirebaseFirestore.InstanceRegistry instanceRegistry) {
-    return new FirebaseFirestore(
-        context,
-        databaseId,
-        persistenceKey,
-        credentialsProvider,
-        asyncQueue,
-        firebaseApp,
-        instanceRegistry,
-        null,
-        null);
+  public static FirebaseFirestore
+  newFirebaseFirestore(Context context, DatabaseId databaseId,
+                       String persistenceKey,
+                       CredentialsProvider credentialsProvider,
+                       AsyncQueue asyncQueue, FirebaseApp firebaseApp,
+                       FirebaseFirestore.InstanceRegistry instanceRegistry) {
+    return new FirebaseFirestore(context, databaseId, persistenceKey,
+                                 credentialsProvider, asyncQueue, firebaseApp,
+                                 instanceRegistry, null, null);
   }
 
   public static AsyncQueue getAsyncQueue(FirebaseFirestore firestore) {

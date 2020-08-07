@@ -40,18 +40,14 @@ final class Dokka {
    *
    * <ol>
    *   <li>Configure Metalava task for Java(non-Kotlin) libraries
-   *   <li>Configure Dokka with the DAC format and full classpath for symbol resolution
-   *   <li>Postprocessing of the produced Kotlindoc
-   *       <ul>
-   *         <li>Copy the _toc.yaml file to "client/{libName}/_toc.yaml"
-   *         <li>Filter out unneeded files
-   *         <li>Copy docs to the buildDir of the root project
-   *         <li>Remove the "https://firebase.google.com" prefix from all urls
+   *   <li>Configure Dokka with the DAC format and full classpath for symbol
+   * resolution <li>Postprocessing of the produced Kotlindoc <ul> <li>Copy the
+   * _toc.yaml file to "client/{libName}/_toc.yaml" <li>Filter out unneeded
+   * files <li>Copy docs to the buildDir of the root project <li>Remove the
+   * "https://firebase.google.com" prefix from all urls
    */
-  static void configure(
-      Project project,
-      @Nullable LibraryExtension android,
-      FirebaseLibraryExtension firebaseLibrary) {
+  static void configure(Project project, @Nullable LibraryExtension android,
+                        FirebaseLibraryExtension firebaseLibrary) {
 
     String dokkaPluginName =
         android == null ? "org.jetbrains.dokka" : "org.jetbrains.dokka-android";
@@ -66,117 +62,91 @@ final class Dokka {
     DokkaTask dokkaTask = configure(project, taskClass);
 
     if (dokkaTask instanceof DokkaAndroidTask) {
-      ((DokkaAndroidTask) dokkaTask).setNoAndroidSdkLink(true);
+      ((DokkaAndroidTask)dokkaTask).setNoAndroidSdkLink(true);
 
-      android
-          .getLibraryVariants()
-          .all(
-              v -> {
-                if (v.getName().equals("release")) {
-                  project.afterEvaluate(
-                      p -> {
-                        FileCollection artifactFiles =
-                            v.getRuntimeConfiguration()
-                                .getIncoming()
-                                .artifactView(
-                                    view -> {
-                                      view.attributes(
-                                          attrs ->
-                                              attrs.attribute(
-                                                  Attribute.of("artifactType", String.class),
-                                                  "jar"));
-                                      view.componentFilter(
-                                          c ->
-                                              !c.getDisplayName()
-                                                  .startsWith("androidx.annotation:annotation:"));
-                                    })
-                                .getArtifacts()
-                                .getArtifactFiles()
-                                .plus(project.files(android.getBootClasspath()));
-                        dokkaTask.setClasspath(artifactFiles);
-                      });
-                }
-              });
+      android.getLibraryVariants().all(v -> {
+        if (v.getName().equals("release")) {
+          project.afterEvaluate(p -> {
+            FileCollection artifactFiles =
+                v.getRuntimeConfiguration()
+                    .getIncoming()
+                    .artifactView(view -> {
+                      view.attributes(
+                          attrs
+                          -> attrs.attribute(
+                              Attribute.of("artifactType", String.class),
+                              "jar"));
+                      view.componentFilter(
+                          c
+                          -> !c.getDisplayName().startsWith(
+                              "androidx.annotation:annotation:"));
+                    })
+                    .getArtifacts()
+                    .getArtifactFiles()
+                    .plus(project.files(android.getBootClasspath()));
+            dokkaTask.setClasspath(artifactFiles);
+          });
+        }
+      });
     }
 
-    project
-        .getTasks()
-        .create(
-            "kotlindoc",
-            Copy.class,
-            copy -> {
-              copy.dependsOn(dokkaTask);
-              copy.setDestinationDir(
-                  project.file(project.getRootProject().getBuildDir() + "/firebase-kotlindoc"));
-              copy.from(
-                  project.getBuildDir() + "/dokka/firebase",
-                  cfg -> {
-                    cfg.exclude("package-list");
-                    cfg.filesMatching(
-                        "_toc.yaml",
-                        fileCopy -> {
-                          fileCopy.setRelativePath(
-                              new RelativePath(
-                                  true, "client", firebaseLibrary.artifactId.get(), "_toc.yaml"));
-                          fileCopy.filter(
-                              line ->
-                                  line.replaceFirst(
-                                      "\\spath:\\s/", " path: /docs/reference/kotlin/"));
-                        });
-                    cfg.filesMatching(
-                        "**/*.html",
-                        fileCopy ->
-                            fileCopy.filter(
-                                line -> line.replaceAll("https://firebase.google.com", "")));
-                  });
-            });
+    project.getTasks().create("kotlindoc", Copy.class, copy -> {
+      copy.dependsOn(dokkaTask);
+      copy.setDestinationDir(project.file(
+          project.getRootProject().getBuildDir() + "/firebase-kotlindoc"));
+      copy.from(project.getBuildDir() + "/dokka/firebase", cfg -> {
+        cfg.exclude("package-list");
+        cfg.filesMatching("_toc.yaml", fileCopy -> {
+          fileCopy.setRelativePath(new RelativePath(
+              true, "client", firebaseLibrary.artifactId.get(), "_toc.yaml"));
+          fileCopy.filter(
+              line
+              -> line.replaceFirst("\\spath:\\s/",
+                                   " path: /docs/reference/kotlin/"));
+        });
+        cfg.filesMatching(
+            "**/*.html",
+            fileCopy
+            -> fileCopy.filter(
+                line -> line.replaceAll("https://firebase.google.com", "")));
+      });
+    });
   }
 
   static <T extends DokkaTask> T configure(Project project, Class<T> taskType) {
-    return project
-        .getTasks()
-        .create(
-            "kotlindocDokka",
-            taskType,
-            dokka -> {
-              dokka.setOutputDirectory(project.getBuildDir() + "/dokka/firebase");
-              dokka.setOutputFormat("dac");
+    return project.getTasks().create("kotlindocDokka", taskType, dokka -> {
+      dokka.setOutputDirectory(project.getBuildDir() + "/dokka/firebase");
+      dokka.setOutputFormat("dac");
 
-              dokka.setGenerateClassIndexPage(false);
-              dokka.setGeneratePackageIndexPage(false);
-              if (!project.getPluginManager().hasPlugin("kotlin-android")) {
-                dokka.dependsOn("docStubs");
-                dokka.setSourceDirs(
-                    Collections.singletonList(project.file(project.getBuildDir() + "/doc-stubs")));
-              }
+      dokka.setGenerateClassIndexPage(false);
+      dokka.setGeneratePackageIndexPage(false);
+      if (!project.getPluginManager().hasPlugin("kotlin-android")) {
+        dokka.dependsOn("docStubs");
+        dokka.setSourceDirs(Collections.singletonList(
+            project.file(project.getBuildDir() + "/doc-stubs")));
+      }
 
-              dokka.setNoJdkLink(true);
+      dokka.setNoJdkLink(true);
 
-              createLink(
-                      project,
-                      "https://developers.android.com/reference/kotlin/",
-                      "kotlindoc/package-lists/android/package-list")
-                  .map(dokka.getExternalDocumentationLinks()::add);
-              createLink(
-                      project,
-                      "https://developers.google.com/android/reference/",
-                      "kotlindoc/package-lists/google/package-list")
-                  .map(dokka.getExternalDocumentationLinks()::add);
-              createLink(
-                      project,
-                      "https://firebase.google.com/docs/reference/kotlin/",
-                      "kotlindoc/package-lists/firebase/package-list")
-                  .map(dokka.getExternalDocumentationLinks()::add);
-              createLink(
-                      project,
-                      "https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/",
-                      "kotlindoc/package-lists/coroutines/package-list")
-                  .map(dokka.getExternalDocumentationLinks()::add);
-            });
+      createLink(project, "https://developers.android.com/reference/kotlin/",
+                 "kotlindoc/package-lists/android/package-list")
+          .map(dokka.getExternalDocumentationLinks()::add);
+      createLink(project, "https://developers.google.com/android/reference/",
+                 "kotlindoc/package-lists/google/package-list")
+          .map(dokka.getExternalDocumentationLinks()::add);
+      createLink(project, "https://firebase.google.com/docs/reference/kotlin/",
+                 "kotlindoc/package-lists/firebase/package-list")
+          .map(dokka.getExternalDocumentationLinks()::add);
+      createLink(
+          project,
+          "https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/",
+          "kotlindoc/package-lists/coroutines/package-list")
+          .map(dokka.getExternalDocumentationLinks()::add);
+    });
   }
 
-  private static Optional<DokkaConfiguration.ExternalDocumentationLink> createLink(
-      Project project, String url, String packageListPath) {
+  private static Optional<DokkaConfiguration.ExternalDocumentationLink>
+  createLink(Project project, String url, String packageListPath) {
 
     File packageListFile = project.getRootProject().file(packageListPath);
     if (!packageListFile.exists()) {

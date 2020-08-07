@@ -41,192 +41,149 @@ public class FirebaseLibraryPlugin implements Plugin<Project> {
   public void apply(Project project) {
     project.apply(ImmutableMap.of("plugin", "com.android.library"));
 
-    FirebaseLibraryExtension firebaseLibrary =
-        project
-            .getExtensions()
-            .create(
-                "firebaseLibrary", FirebaseLibraryExtension.class, project, LibraryType.ANDROID);
+    FirebaseLibraryExtension firebaseLibrary = project.getExtensions().create(
+        "firebaseLibrary", FirebaseLibraryExtension.class, project,
+        LibraryType.ANDROID);
 
-    LibraryExtension android = project.getExtensions().getByType(LibraryExtension.class);
+    LibraryExtension android =
+        project.getExtensions().getByType(LibraryExtension.class);
 
-    // In the case of and android library signing config only affects instrumentation test APK.
-    // We need it signed with default debug credentials in order for FTL to accept the APK.
-    android.buildTypes(
-        types ->
-            types
-                .getByName("release")
-                .setSigningConfig(types.getByName("debug").getSigningConfig()));
+    // In the case of and android library signing config only affects
+    // instrumentation test APK. We need it signed with default debug
+    // credentials in order for FTL to accept the APK.
+    android.buildTypes(types
+                       -> types.getByName("release").setSigningConfig(
+                           types.getByName("debug").getSigningConfig()));
 
     // see https://github.com/robolectric/robolectric/issues/5456
     android.testOptions(
-        options ->
-            options
-                .getUnitTests()
-                .all(
-                    closureOf(
-                        test -> {
-                          test.systemProperty("robolectric.dependency.repo.id", "central");
-                          test.systemProperty(
-                              "robolectric.dependency.repo.url", "https://repo1.maven.org/maven2");
-                          test.systemProperty("javax.net.ssl.trustStoreType", "JKS");
-                        })));
+        options -> options.getUnitTests().all(closureOf(test -> {
+          test.systemProperty("robolectric.dependency.repo.id", "central");
+          test.systemProperty("robolectric.dependency.repo.url",
+                              "https://repo1.maven.org/maven2");
+          test.systemProperty("javax.net.ssl.trustStoreType", "JKS");
+        })));
 
     // skip debug tests in CI
     // TODO(vkryachko): provide ability for teams to control this if needed
     if (System.getenv().containsKey("FIREBASE_CI")) {
       android.setTestBuildType("release");
-      project
-          .getTasks()
-          .all(
-              task -> {
-                if ("testDebugUnitTest".equals(task.getName())) {
-                  task.setEnabled(false);
-                }
-              });
+      project.getTasks().all(task -> {
+        if ("testDebugUnitTest".equals(task.getName())) {
+          task.setEnabled(false);
+        }
+      });
     }
 
     setupApiInformationAnalysis(project, android);
 
-    android.testServer(new FirebaseTestServer(project, firebaseLibrary.testLab));
+    android.testServer(
+        new FirebaseTestServer(project, firebaseLibrary.testLab));
 
     setupStaticAnalysis(project, firebaseLibrary);
 
     // reduce the likelihood of kotlin module files colliding.
-    project
-        .getTasks()
-        .withType(
-            KotlinCompile.class,
-            kotlin ->
-                kotlin
-                    .getKotlinOptions()
-                    .setFreeCompilerArgs(
-                        ImmutableList.of("-module-name", kotlinModuleName(project))));
+    project.getTasks().withType(
+        KotlinCompile.class,
+        kotlin
+        -> kotlin.getKotlinOptions().setFreeCompilerArgs(
+            ImmutableList.of("-module-name", kotlinModuleName(project))));
 
-    project.afterEvaluate(p -> Dokka.configure(project, android, firebaseLibrary));
+    project.afterEvaluate(
+        p -> Dokka.configure(project, android, firebaseLibrary));
   }
 
-  private static void setupApiInformationAnalysis(Project project, LibraryExtension android) {
-    File metalavaOutputJarFile = new File(project.getRootProject().getBuildDir(), "metalava.jar");
+  private static void setupApiInformationAnalysis(Project project,
+                                                  LibraryExtension android) {
+    File metalavaOutputJarFile =
+        new File(project.getRootProject().getBuildDir(), "metalava.jar");
     AndroidSourceSet mainSourceSet = android.getSourceSets().getByName("main");
-    File outputFile =
-        project
-            .getRootProject()
-            .file(
-                Paths.get(
-                    project.getRootProject().getBuildDir().getPath(),
-                    "apiinfo",
-                    project.getPath().substring(1).replace(":", "_")));
+    File outputFile = project.getRootProject().file(
+        Paths.get(project.getRootProject().getBuildDir().getPath(), "apiinfo",
+                  project.getPath().substring(1).replace(":", "_")));
     File outputApiFile = new File(outputFile.getAbsolutePath() + "_api.txt");
 
-    project
-        .getTasks()
-        .register(
-            "getMetalavaJar",
-            GetMetalavaJarTask.class,
-            task -> {
-              task.setOutputFile(metalavaOutputJarFile);
-            });
-    File apiTxt =
-        project.file("api.txt").exists()
-            ? project.file("api.txt")
-            : project.file(project.getRootDir() + "/empty-api.txt");
-    TaskProvider<ApiInformationTask> apiInfo =
-        project
-            .getTasks()
-            .register(
-                "apiInformation",
-                ApiInformationTask.class,
-                task -> {
-                  task.setApiTxt(apiTxt);
-                  task.setMetalavaJarPath(metalavaOutputJarFile.getAbsolutePath());
-                  task.setSourceSet(mainSourceSet);
-                  task.setOutputFile(outputFile);
-                  task.setBaselineFile(project.file("baseline.txt"));
-                  task.setOutputApiFile(outputApiFile);
-                  if (project.hasProperty("updateBaseline")) {
-                    task.setUpdateBaseline(true);
-                  } else {
-                    task.setUpdateBaseline(false);
-                  }
-                  task.dependsOn("getMetalavaJar");
-                });
+    project.getTasks().register(
+        "getMetalavaJar", GetMetalavaJarTask.class,
+        task -> { task.setOutputFile(metalavaOutputJarFile); });
+    File apiTxt = project.file("api.txt").exists()
+                      ? project.file("api.txt")
+                      : project.file(project.getRootDir() + "/empty-api.txt");
+    TaskProvider<ApiInformationTask> apiInfo = project.getTasks().register(
+        "apiInformation", ApiInformationTask.class, task -> {
+          task.setApiTxt(apiTxt);
+          task.setMetalavaJarPath(metalavaOutputJarFile.getAbsolutePath());
+          task.setSourceSet(mainSourceSet);
+          task.setOutputFile(outputFile);
+          task.setBaselineFile(project.file("baseline.txt"));
+          task.setOutputApiFile(outputApiFile);
+          if (project.hasProperty("updateBaseline")) {
+            task.setUpdateBaseline(true);
+          } else {
+            task.setUpdateBaseline(false);
+          }
+          task.dependsOn("getMetalavaJar");
+        });
 
     TaskProvider<GenerateApiTxtFileTask> generateApiTxt =
-        project
-            .getTasks()
-            .register(
-                "generateApiTxtFile",
-                GenerateApiTxtFileTask.class,
-                task -> {
-                  task.setApiTxt(project.file("api.txt"));
-                  task.setMetalavaJarPath(metalavaOutputJarFile.getAbsolutePath());
-                  task.setSourceSet(mainSourceSet);
-                  task.setBaselineFile(project.file("baseline.txt"));
-                  task.setUpdateBaseline(project.hasProperty("updateBaseline"));
-                  task.dependsOn("getMetalavaJar");
-                });
+        project.getTasks().register(
+            "generateApiTxtFile", GenerateApiTxtFileTask.class, task -> {
+              task.setApiTxt(project.file("api.txt"));
+              task.setMetalavaJarPath(metalavaOutputJarFile.getAbsolutePath());
+              task.setSourceSet(mainSourceSet);
+              task.setBaselineFile(project.file("baseline.txt"));
+              task.setUpdateBaseline(project.hasProperty("updateBaseline"));
+              task.dependsOn("getMetalavaJar");
+            });
 
-    TaskProvider<GenerateStubsTask> docStubs =
-        project
-            .getTasks()
-            .register(
-                "docStubs",
-                GenerateStubsTask.class,
-                task -> {
-                  task.setMetalavaJarPath(metalavaOutputJarFile.getAbsolutePath());
-                  task.setOutputDir(new File(project.getBuildDir(), "doc-stubs"));
-                  task.dependsOn("getMetalavaJar");
+    TaskProvider<GenerateStubsTask> docStubs = project.getTasks().register(
+        "docStubs", GenerateStubsTask.class, task -> {
+          task.setMetalavaJarPath(metalavaOutputJarFile.getAbsolutePath());
+          task.setOutputDir(new File(project.getBuildDir(), "doc-stubs"));
+          task.dependsOn("getMetalavaJar");
 
-                  task.setSourceSet(mainSourceSet);
-                });
+          task.setSourceSet(mainSourceSet);
+        });
     project.getTasks().getByName("check").dependsOn(docStubs);
 
-    android
-        .getLibraryVariants()
-        .all(
-            v -> {
-              if (v.getName().equals("release")) {
-                FileCollection jars =
-                    v.getCompileConfiguration()
-                        .getIncoming()
-                        .artifactView(
-                            config ->
-                                config.attributes(
-                                    container ->
-                                        container.attribute(
-                                            Attribute.of("artifactType", String.class), "jar")))
-                        .getArtifacts()
-                        .getArtifactFiles();
-                apiInfo.configure(t -> t.setClassPath(jars));
-                generateApiTxt.configure(t -> t.setClassPath(jars));
-                docStubs.configure(t -> t.setClassPath(jars));
-              }
-            });
+    android.getLibraryVariants().all(v -> {
+      if (v.getName().equals("release")) {
+        FileCollection jars =
+            v.getCompileConfiguration()
+                .getIncoming()
+                .artifactView(
+                    config
+                    -> config.attributes(
+                        container
+                        -> container.attribute(
+                            Attribute.of("artifactType", String.class), "jar")))
+                .getArtifacts()
+                .getArtifactFiles();
+        apiInfo.configure(t -> t.setClassPath(jars));
+        generateApiTxt.configure(t -> t.setClassPath(jars));
+        docStubs.configure(t -> t.setClassPath(jars));
+      }
+    });
   }
 
-  private static void setupStaticAnalysis(Project project, FirebaseLibraryExtension library) {
-    project.afterEvaluate(
-        p ->
-            project
-                .getConfigurations()
-                .all(
-                    c -> {
-                      if ("annotationProcessor".equals(c.getName())) {
-                        for (String checkProject : library.staticAnalysis.errorproneCheckProjects) {
-                          project
-                              .getDependencies()
-                              .add("annotationProcessor", project.project(checkProject));
-                        }
-                      }
-                      if ("lintChecks".equals(c.getName())) {
-                        for (String checkProject :
-                            library.staticAnalysis.androidLintCheckProjects) {
-                          project
-                              .getDependencies()
-                              .add("lintChecks", project.project(checkProject));
-                        }
-                      }
-                    }));
+  private static void setupStaticAnalysis(Project project,
+                                          FirebaseLibraryExtension library) {
+    project.afterEvaluate(p -> project.getConfigurations().all(c -> {
+      if ("annotationProcessor".equals(c.getName())) {
+        for (String checkProject :
+             library.staticAnalysis.errorproneCheckProjects) {
+          project.getDependencies().add("annotationProcessor",
+                                        project.project(checkProject));
+        }
+      }
+      if ("lintChecks".equals(c.getName())) {
+        for (String checkProject :
+             library.staticAnalysis.androidLintCheckProjects) {
+          project.getDependencies().add("lintChecks",
+                                        project.project(checkProject));
+        }
+      }
+    }));
 
     project.getTasks().register("firebaseLint", task -> task.dependsOn("lint"));
     Coverage.apply(library);
